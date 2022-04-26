@@ -2,6 +2,7 @@ package com.alinebatch.alinebatchwd.config;
 
 
 import com.alinebatch.alinebatchwd.models.Transaction;
+import com.alinebatch.alinebatchwd.models.TransactionDTO;
 import com.alinebatch.alinebatchwd.processors.TransactionProcessor;
 import com.alinebatch.alinebatchwd.writers.UserXmlItemWriter;
 import org.springframework.batch.core.Job;
@@ -30,10 +31,10 @@ public class BatchConfig {
     JobBuilderFactory jobBuilderFactory;
 
     @Bean
-    public FlatFileItemReader<Transaction> CsvReader()
+    public FlatFileItemReader<TransactionDTO> CsvReader()
     {
 
-        return new FlatFileItemReaderBuilder<Transaction>()
+        return new FlatFileItemReaderBuilder<TransactionDTO>()
                 .name("CsvItemReader")
                 .resource(new FileSystemResource("/home/will/IdeaProjects/aline-batch-wd/src/main/resources/card_transaction.v1.csv"))
                 .linesToSkip(1)
@@ -41,7 +42,7 @@ public class BatchConfig {
                 .delimiter(",")
                 .names("user", "card", "year", "month", "day", "time", "amount", "method", "merchant_name", "merchant_city", "merchant_state", "merchant_zip", "mcc", "errors", "fraud")
                 .fieldSetMapper(new BeanWrapperFieldSetMapper<>(){
-                    {setTargetType(Transaction.class);}
+                    {setTargetType(TransactionDTO.class);}
                 })
                 .build();
     }
@@ -51,12 +52,12 @@ public class BatchConfig {
     {
 
         ThreadPoolTaskExecutor threadTask = new ThreadPoolTaskExecutor();
-                threadTask.setCorePoolSize(6);
+                threadTask.setCorePoolSize(12);
                 threadTask.setMaxPoolSize(250);
                 threadTask.afterPropertiesSet();
 
                 return stepBuilderFactory.get("multiThreadedStep")
-                        .<Transaction,Object>chunk(10000)
+                        .<TransactionDTO,Object>chunk(10000)
                         .reader(CsvReader())
                         .processor(new TransactionProcessor())
                         .writer(new UserXmlItemWriter())

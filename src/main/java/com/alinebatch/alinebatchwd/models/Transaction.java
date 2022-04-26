@@ -9,8 +9,8 @@ import lombok.*;
 @AllArgsConstructor
 public class Transaction {
 
-    private Long user;
-    private Long card;
+    private User user;
+    private Card card;
     private Integer year;
     private Integer month;
     private Integer day;

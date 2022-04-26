@@ -19,25 +19,11 @@ public class UserXmlItemWriter extends AbstractItemStreamItemWriter {
 
     @Override
     public void write(List list) throws Exception {
-
-
         XStream xs = new XStream();
-        xs.alias("user", User.class);
-        FileOutputStream fos = new FileOutputStream("/home/will/IdeaProjects/aline-batch-wd/src/main/resources/userOutput.xml",true);
-        userCache.getAll().forEach((k,v) ->{
-            if (!userCache.getSeen().contains(k))
-            {
-                synchronized (UserCache.class)
-                {
-                    if (!userCache.getSeen().contains(k))
-                    {
-                        xs.toXML(v,fos);
-                        userCache.setSeen(k);
-                    }
-                }
-            }
+        xs.alias("transaction",Transaction.class);
+        FileOutputStream fos = new FileOutputStream("/home/will/IdeaProjects/aline-batch-wd/src/main/resources/transactionOutput.xml",true);
+        list.forEach((t) -> {
+            xs.toXML(t,fos);
         });
-
-
     }
 }
