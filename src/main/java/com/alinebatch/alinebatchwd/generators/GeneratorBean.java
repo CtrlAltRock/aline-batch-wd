@@ -3,6 +3,7 @@ package com.alinebatch.alinebatchwd.generators;
 import com.alinebatch.alinebatchwd.caches.CardCache;
 import com.alinebatch.alinebatchwd.caches.UserCache;
 import com.alinebatch.alinebatchwd.models.Card;
+import com.alinebatch.alinebatchwd.models.State;
 import com.alinebatch.alinebatchwd.models.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.xstream.XStream;
@@ -43,10 +44,6 @@ public class GeneratorBean {
                         input = in.readLine();
                         User user = new ObjectMapper().readValue(input, User.class);
                         userCache.set(id, user);
-                        XStream xs = new XStream();
-                        xs.alias("user", User.class);
-                        FileOutputStream fos = new FileOutputStream("/home/will/IdeaProjects/aline-batch-wd/src/main/resources/userOutput.xml",true);
-                        xs.toXML(user,fos);
                         return user;
                     } catch (Exception e) {
                         log.info(e.getMessage());
@@ -71,10 +68,6 @@ public class GeneratorBean {
                         input = in.readLine();
                         Card card = new ObjectMapper().readValue(input, Card.class);
                         cardCache.set(userId, cardId, card);
-                        XStream xs = new XStream();
-                        xs.alias("card",Card.class);
-                        FileOutputStream fos = new FileOutputStream("/home/will/IdeaProjects/aline-batch-wd/src/main/resources/cardOutput.xml",true);
-                        xs.toXML(card,fos);
                         return card;
                     } catch (Exception e) {
                         log.info(e.getMessage());

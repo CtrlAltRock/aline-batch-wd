@@ -26,6 +26,11 @@ public class CardCache {
 
     private HashSet<String> seenCache = new HashSet<>();
 
+    public HashMap<Long, Card> getAll(Long userId)
+    {
+        return CardCache.getInstance().cacheMap.get(userId);
+    }
+
     public Card get(Long userId, Long cardId) {
         if (CardCache.getInstance().cacheMap.get(userId) == null)
         {
