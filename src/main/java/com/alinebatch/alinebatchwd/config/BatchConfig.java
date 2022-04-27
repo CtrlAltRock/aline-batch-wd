@@ -3,12 +3,13 @@ package com.alinebatch.alinebatchwd.config;
 
 import com.alinebatch.alinebatchwd.caches.UserCache;
 import com.alinebatch.alinebatchwd.models.Card;
-import com.alinebatch.alinebatchwd.models.Transaction;
 import com.alinebatch.alinebatchwd.models.TransactionDTO;
 import com.alinebatch.alinebatchwd.models.User;
 import com.alinebatch.alinebatchwd.processors.CardCacheProcessor;
 import com.alinebatch.alinebatchwd.processors.TransactionProcessor;
 import com.alinebatch.alinebatchwd.processors.UserCacheProcessor;
+import com.alinebatch.alinebatchwd.readers.BasicCloser;
+import com.alinebatch.alinebatchwd.readers.BasicPrepper;
 import com.alinebatch.alinebatchwd.readers.UserCacheReader;
 import com.alinebatch.alinebatchwd.writers.CardItemWriter;
 import com.alinebatch.alinebatchwd.writers.GeneralXmlWriter;
@@ -18,18 +19,21 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
+import org.springframework.batch.item.xml.builder.StaxEventItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.oxm.xstream.XStreamMarshaller;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 
 @Configuration
 @EnableBatchProcessing
@@ -42,12 +46,27 @@ public class BatchConfig {
     JobBuilderFactory jobBuilderFactory;
 
     @Bean
+    public ItemWriter<Card> cardWriter()
+    {
+        Resource exportFileResource = new FileSystemResource("src/main/resources/cardOutput.xml");
+
+        XStreamMarshaller cardMarshaller = new XStreamMarshaller();
+        cardMarshaller.setAliases(Collections.singletonMap("card",Card.class));
+        return new StaxEventItemWriterBuilder<Card>()
+                .name("cardWriter")
+                .resource(exportFileResource)
+                .marshaller(cardMarshaller)
+                .rootTagName("cards")
+                .build();
+    }
+
+    @Bean
     public FlatFileItemReader<TransactionDTO> CsvReader()
     {
 
         return new FlatFileItemReaderBuilder<TransactionDTO>()
                 .name("CsvItemReader")
-                .resource(new FileSystemResource("/Users/willemduiker/Documents/card_transaction.v1.csv"))
+                .resource(new FileSystemResource("/Users/willemduiker/Documents/test2.csv"))
                 .linesToSkip(1)
                 .delimited()
                 .delimiter(",")
@@ -111,12 +130,44 @@ public class BatchConfig {
     }
 
     @Bean
+    public Step PrepStep()
+    {
+        return stepBuilderFactory
+                .get("prepareXML")
+                .tasklet(basicPrepper())
+                .build();
+    }
+
+    @Bean
+    public Step CloseStep()
+    {
+        return stepBuilderFactory
+                .get("closeXML")
+                .tasklet(basicCloser())
+                .build();
+    }
+
+    @Bean
+    public BasicPrepper basicPrepper()
+    {
+        return new BasicPrepper();
+    }
+
+    @Bean
+    public BasicCloser basicCloser()
+    {
+        return new BasicCloser();
+    }
+
+    @Bean
     public Job buildJob()
     {
         return jobBuilderFactory.get("transactionJob")
-                .start(multiThreadedStep())
+                .start(PrepStep())
+                .next(multiThreadedStep())
                 .next(UserCacheStep())
                 .next(CardCacheStep())
+                .next(CloseStep())
                 .build();
     }
 }

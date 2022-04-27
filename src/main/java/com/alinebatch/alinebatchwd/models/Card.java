@@ -21,6 +21,9 @@ public class Card {
     private Long id;
 
     @Column(nullable = false)
+    private Long userId;
+
+    @Column(nullable = false)
     private String cardNumber;
 
     @Column(nullable = false)

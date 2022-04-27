@@ -67,6 +67,7 @@ public class GeneratorBean {
                         String input;
                         input = in.readLine();
                         Card card = new ObjectMapper().readValue(input, Card.class);
+                        card.setUserId(userId);
                         cardCache.set(userId, cardId, card);
                         return card;
                     } catch (Exception e) {

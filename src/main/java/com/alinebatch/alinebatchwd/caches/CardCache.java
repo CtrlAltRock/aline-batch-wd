@@ -6,6 +6,7 @@ import org.aspectj.lang.reflect.CatchClauseSignature;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CardCache {
@@ -22,7 +23,7 @@ public class CardCache {
         return instance;
     }
 
-    private AbstractMap<Long, HashMap<Long, Card>> cacheMap = new ConcurrentHashMap<>();
+    private LinkedHashMap<Long, HashMap<Long, Card>> cacheMap = new LinkedHashMap<>();
 
     private HashSet<String> seenCache = new HashSet<>();
 
