@@ -13,7 +13,13 @@ public class UserCache {
     {
         if (instance == null)
         {
-            instance = new UserCache();
+            synchronized (UserCache.class)
+            {
+                if (instance == null)
+                {
+                    instance = new UserCache();
+                }
+            }
         }
         return instance;
     }

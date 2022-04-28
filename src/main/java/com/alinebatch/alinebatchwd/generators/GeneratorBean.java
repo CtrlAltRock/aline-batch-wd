@@ -1,10 +1,9 @@
 package com.alinebatch.alinebatchwd.generators;
 
 import com.alinebatch.alinebatchwd.caches.CardCache;
+import com.alinebatch.alinebatchwd.caches.MerchantCache;
 import com.alinebatch.alinebatchwd.caches.UserCache;
-import com.alinebatch.alinebatchwd.models.Card;
-import com.alinebatch.alinebatchwd.models.State;
-import com.alinebatch.alinebatchwd.models.User;
+import com.alinebatch.alinebatchwd.models.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.xstream.XStream;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +26,8 @@ public class GeneratorBean {
     private static UserCache userCache = new UserCache();
 
     private static CardCache cardCache = new CardCache();
+
+    private static MerchantCache merchantCache = new MerchantCache();
 
     private static int userCount = 0;
     private static int cardCount = 0;
@@ -59,7 +60,6 @@ public class GeneratorBean {
             synchronized (CardCache.class) {
                 if (cardCache.get(userId, cardId) == null) {
                     try {
-                        log.info(userId+", " + cardId);
                         URL url = new URL(baseUrl + "/users/generate/card/" + userId + "/" + cardId);
                         HttpURLConnection con = (HttpURLConnection) url.openConnection();
                         con.setRequestMethod("GET");
@@ -67,6 +67,7 @@ public class GeneratorBean {
                         String input;
                         input = in.readLine();
                         Card card = new ObjectMapper().readValue(input, Card.class);
+                        card.setUserId(userId);
                         cardCache.set(userId, cardId, card);
                         return card;
                     } catch (Exception e) {
@@ -76,5 +77,29 @@ public class GeneratorBean {
             }
         }
         return cardCache.get(userId, cardId);
+    }
+
+    public Merchant getMerchant(String name, TransactionDTO transaction) throws Exception
+    {
+        if (merchantCache.get(name) == null)
+        {
+            synchronized (MerchantCache.class) {
+                if (merchantCache.get(name) == null)
+                {
+                    URL url = new URL(baseUrl + "/merchants/generate/merchant/" + name);
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    con.setRequestMethod("GET");
+                    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                    String input;
+                    input = in.readLine();
+                    Merchant m = new ObjectMapper().readValue(input, Merchant.class);
+                    m.setCity(transaction.getMerchant_city());
+                    m.setZip(transaction.getMerchant_zip());
+                    m.setState(transaction.getMerchant_state());
+                    merchantCache.set(name, m, m.getId());
+                }
+            }
+        }
+        return merchantCache.get(name);
     }
 }
