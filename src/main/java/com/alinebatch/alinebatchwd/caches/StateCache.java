@@ -11,7 +11,7 @@ public class StateCache {
 
     public static StateCache instance = null;
 
-    public StateCache getInstance()
+    public static StateCache getInstance()
     {
         if (instance == null)
         {
@@ -36,6 +36,10 @@ public class StateCache {
         ArrayList<String> preSave = getInstance().stateCache.get(abbreviation).getZips();
         preSave.add(zip);
         getInstance().stateCache.get(abbreviation).setZips(preSave);
+    }
+
+    public Map<String, State> getAll(){
+        return stateCache;
     }
 
     private Map<String, State> stateCache = Map.ofEntries(

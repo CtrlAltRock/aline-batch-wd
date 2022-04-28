@@ -10,7 +10,6 @@ public class UserCacheProcessor implements ItemProcessor<User, User> {
     @Override
     public User process(User user)
     {
-        log.info(user.toString());
         return user;
     }
 }

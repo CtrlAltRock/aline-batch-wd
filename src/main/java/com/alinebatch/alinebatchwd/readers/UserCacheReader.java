@@ -27,7 +27,6 @@ public class UserCacheReader<T> implements ItemReader<T> {
             return list.get(currentIndex++);
 
         }
-
         return null;
     }
 

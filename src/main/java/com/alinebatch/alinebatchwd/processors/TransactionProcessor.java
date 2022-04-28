@@ -18,6 +18,8 @@ public class TransactionProcessor implements ItemProcessor<TransactionDTO, Trans
 
     static StateCache stateCache = new StateCache();
 
+    Long howMany = 0L;
+
 
 
     //Creates Caches of all objects
@@ -32,6 +34,7 @@ public class TransactionProcessor implements ItemProcessor<TransactionDTO, Trans
         long cardId = transactionD.getCard();
         User u = generatorBean.getUser(userId);
         Card c = generatorBean.getCard(userId,cardId);
+        Merchant m = generatorBean.getMerchant(transactionD.getMerchant_name(), transactionD);
         return transactionD;
     }
 }

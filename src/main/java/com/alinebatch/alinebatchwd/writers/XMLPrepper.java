@@ -14,8 +14,8 @@ public class XMLPrepper {
 
         try {
             FileWriter xmlWriter = new FileWriter(path);
-            xmlWriter.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-            xmlWriter.append("<"+ rootName + ">");
+            xmlWriter.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+            xmlWriter.append("<"+ rootName + ">\n");
             xmlWriter.close();
         } catch (IOException e)
         {
@@ -27,7 +27,7 @@ public class XMLPrepper {
     {
         try {
             FileWriter xmlWriter = new FileWriter(path,true);
-            xmlWriter.append("</" + rootName + ">");
+            xmlWriter.append("\n</" + rootName + ">");
             xmlWriter.close();
         } catch (IOException e)
         {

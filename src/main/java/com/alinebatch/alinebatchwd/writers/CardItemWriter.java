@@ -6,6 +6,7 @@ import com.thoughtworks.xstream.XStream;
 import org.hibernate.cfg.Environment;
 import org.springframework.batch.item.support.AbstractItemStreamItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.FileOutputStream;
 import java.util.HashMap;
@@ -15,6 +16,9 @@ public class CardItemWriter extends AbstractItemStreamItemWriter {
 
     @Autowired
     private Environment environment;
+
+    @Value("${cardOut}")
+    String cardOut;
 
     @Override
     public void write(List list) throws Exception {

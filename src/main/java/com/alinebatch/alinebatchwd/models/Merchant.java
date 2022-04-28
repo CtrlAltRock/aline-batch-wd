@@ -7,23 +7,23 @@ import lombok.extern.slf4j.Slf4j;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import java.util.ArrayList;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Slf4j
+@NoArgsConstructor
+@AllArgsConstructor
 @Setter
 @Getter
 @Data
-public class State {
+public class Merchant {
+
+    private Long id;
 
     private String name;
 
-    private String abbreviation;
+    private String city;
 
-    private String capital;
+    private String state;
 
-    private ArrayList<String> zips;
+    private String zip;
 
 }
