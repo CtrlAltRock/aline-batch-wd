@@ -47,6 +47,7 @@ public class GeneratorBean {
                         String input;
                         input = in.readLine();
                         User user = new ObjectMapper().readValue(input, User.class);
+                        analyzer.increaseUsers();
                         userCache.set(id, user);
                         return user;
                     } catch (Exception e) {

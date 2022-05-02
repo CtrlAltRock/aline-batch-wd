@@ -27,6 +27,9 @@ public class BasicPrepper implements Tasklet{
     @Value("${userOut}")
     String userOut;
 
+    @Value("${analysisOut}")
+    String analysisOut;
+
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
         log.info("Entering Prep Step");
@@ -34,6 +37,7 @@ public class BasicPrepper implements Tasklet{
         XMLPrepper.prep(userOut, "users");
         XMLPrepper.prep(stateOut, "states");
         XMLPrepper.prep(merchantOut, "merchants");
+        XMLPrepper.prep(analysisOut, "analysis");
         return RepeatStatus.FINISHED;
     }
 }
