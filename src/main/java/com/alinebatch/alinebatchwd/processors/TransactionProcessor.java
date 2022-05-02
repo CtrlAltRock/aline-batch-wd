@@ -1,6 +1,7 @@
 package com.alinebatch.alinebatchwd.processors;
 
 
+import com.alinebatch.alinebatchwd.analytics.Analyzer;
 import com.alinebatch.alinebatchwd.caches.StateCache;
 import com.alinebatch.alinebatchwd.generators.GeneratorBean;
 import com.alinebatch.alinebatchwd.models.*;
@@ -18,6 +19,8 @@ public class TransactionProcessor implements ItemProcessor<TransactionDTO, Trans
 
     static StateCache stateCache = new StateCache();
 
+    Analyzer analyzer = new Analyzer();
+
     Long howMany = 0L;
 
 
@@ -32,6 +35,7 @@ public class TransactionProcessor implements ItemProcessor<TransactionDTO, Trans
         {
             log.info("Attempted to write non US State");
         }
+        analyzer.processTransaction(transactionD);
         long userId = transactionD.getUser();
         long cardId = transactionD.getCard();
         User u = generatorBean.getUser(userId);
