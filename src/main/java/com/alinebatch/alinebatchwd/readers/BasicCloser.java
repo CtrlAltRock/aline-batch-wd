@@ -23,6 +23,9 @@ public class BasicCloser implements Tasklet {
     @Value("${userOut}")
     String userOut;
 
+    @Value("${analysisOut}")
+    String analysisOut;
+
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
         log.info("Entering Closer Step");
@@ -30,6 +33,7 @@ public class BasicCloser implements Tasklet {
         XMLPrepper.close(userOut, "users");
         XMLPrepper.close(stateOut, "states");
         XMLPrepper.close(merchantOut, "merchants");
+        XMLPrepper.close(analysisOut, "analysis");
         return RepeatStatus.FINISHED;
     }
 }

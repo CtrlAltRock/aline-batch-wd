@@ -33,7 +33,7 @@ public class TransactionProcessor implements ItemProcessor<TransactionDTO, Trans
 
         } catch (NullPointerException e)
         {
-            log.info("Attempted to write non US State");
+            //log.info("Attempted to write non US State");
         }
         analyzer.processTransaction(transactionD);
         long userId = transactionD.getUser();
