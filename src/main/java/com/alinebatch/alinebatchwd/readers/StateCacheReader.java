@@ -17,7 +17,15 @@ public class StateCacheReader<T> implements ItemReader<T> {
     {
         if (list.hasNext())
         {
-            return list.next();
+            synchronized (StateCacheReader.class)
+            {
+                if (list.hasNext())
+                {
+                    return list.next();
+                }
+
+            }
+
         }
 
         return null;

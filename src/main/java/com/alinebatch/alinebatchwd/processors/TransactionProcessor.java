@@ -1,6 +1,7 @@
 package com.alinebatch.alinebatchwd.processors;
 
 
+import com.alinebatch.alinebatchwd.analytics.Analyzer;
 import com.alinebatch.alinebatchwd.caches.StateCache;
 import com.alinebatch.alinebatchwd.generators.GeneratorBean;
 import com.alinebatch.alinebatchwd.models.*;
@@ -18,18 +19,23 @@ public class TransactionProcessor implements ItemProcessor<TransactionDTO, Trans
 
     static StateCache stateCache = new StateCache();
 
+    Analyzer analyzer = new Analyzer();
+
     Long howMany = 0L;
 
 
 
-    //Creates Caches of all objects
+    //Creates Caches for all objects
     @Override
     public TransactionDTO process(TransactionDTO transactionD) throws Exception {
         try {
             stateCache.getInstance().putZip(transactionD.getMerchant_state(),transactionD.getMerchant_zip());
+
         } catch (NullPointerException e)
         {
+            log.info("Attempted to write non US State");
         }
+        analyzer.processTransaction(transactionD);
         long userId = transactionD.getUser();
         long cardId = transactionD.getCard();
         User u = generatorBean.getUser(userId);
