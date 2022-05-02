@@ -1,5 +1,6 @@
 package com.alinebatch.alinebatchwd.generators;
 
+import com.alinebatch.alinebatchwd.analytics.Analyzer;
 import com.alinebatch.alinebatchwd.caches.CardCache;
 import com.alinebatch.alinebatchwd.caches.MerchantCache;
 import com.alinebatch.alinebatchwd.caches.UserCache;
@@ -31,6 +32,8 @@ public class GeneratorBean {
 
     private static int userCount = 0;
     private static int cardCount = 0;
+
+    private Analyzer analyzer = new Analyzer();
 
     public User getUser(long id) throws Exception {
         if (userCache.get(id) == null) {
@@ -97,6 +100,7 @@ public class GeneratorBean {
                     m.setZip(transaction.getMerchant_zip());
                     m.setState(transaction.getMerchant_state());
                     merchantCache.set(name, m, m.getId());
+                    analyzer.addMerchant();
                 }
             }
         }

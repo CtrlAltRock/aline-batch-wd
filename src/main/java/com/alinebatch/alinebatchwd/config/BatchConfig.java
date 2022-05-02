@@ -108,12 +108,14 @@ public class BatchConfig {
                 threadTask.afterPropertiesSet();
 
                 return stepBuilderFactory.get("multiThreadedStep")
-                        .<TransactionDTO,Object>chunk(10000)
+                        .<TransactionDTO,Object>chunk(100)
                         .reader(CsvReader())
                         .processor(new TransactionProcessor())
                         .writer(new UserXmlItemWriter())
                         .faultTolerant()
-                        .skipLimit(100)
+                        .skipLimit(1)
+                        .retry(Exception.class)
+                        .retryLimit(1)
                         .skip(ParameterMappingException.class)
                         .skip(FlatFileFormatException.class)
                         .skip(FlatFileParseException.class)
@@ -182,6 +184,15 @@ public class BatchConfig {
     }
 
     @Bean
+    public Step analysisStep()
+    {
+        return stepBuilderFactory
+                .get("output_analysis")
+                .tasklet(doAnalysis())
+                .build();
+    }
+
+    @Bean
     public Step CloseStep()
     {
         return stepBuilderFactory
@@ -203,6 +214,8 @@ public class BatchConfig {
     }
 
     @Bean
+    public AnalyzerWriter doAnalysis() { return new AnalyzerWriter();}
+    @Bean
     public Job buildJob()
     {
         return jobBuilderFactory.get("transactionJob")
@@ -212,6 +225,7 @@ public class BatchConfig {
                 .next(UserCacheStep())
                 .next(CardCacheStep())
                 .next(StateCacheStep())
+                .next(analysisStep())
                 .next(CloseStep())
                 .build();
     }

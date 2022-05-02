@@ -22,13 +22,15 @@ public class TransactionProcessor implements ItemProcessor<TransactionDTO, Trans
 
 
 
-    //Creates Caches of all objects
+    //Creates Caches for all objects
     @Override
     public TransactionDTO process(TransactionDTO transactionD) throws Exception {
         try {
             stateCache.getInstance().putZip(transactionD.getMerchant_state(),transactionD.getMerchant_zip());
+
         } catch (NullPointerException e)
         {
+            log.info("Attempted to write non US State");
         }
         long userId = transactionD.getUser();
         long cardId = transactionD.getCard();

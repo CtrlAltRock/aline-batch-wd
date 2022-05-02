@@ -26,9 +26,15 @@ public class MerchantCacheReader<T> implements ItemReader<T> {
     {
         while (index < merchantCache.getAll().size())
         {
-            Merchant m = merchantCache.getById(index);
-            index += 1L;
-            return (T)m;
+            synchronized (MerchantCache.class)
+            {
+                if (index < merchantCache.getAll().size())
+                {
+                    Merchant m = merchantCache.getById(index);
+                    index += 1L;
+                    return (T)m;
+                }
+            }
         }
         return null;
     }
