@@ -3,6 +3,8 @@ package com.alinebatch.alinebatchwd.analytics;
 
 import com.alinebatch.alinebatchwd.models.Transaction;
 import com.alinebatch.alinebatchwd.models.TransactionDTO;
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,18 +18,29 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class Analyzer {
 
+    @XStreamAlias("Number of Merchants")
     private Long merchants = 0L;
 
+    @XStreamAlias("Number of Users")
     private int users = 0;
 
+    @XStreamAlias("Number of deposits")
     private int deposits = 0;
 
+    private int inLoop = 0;
+
+    @XStreamAlias("Percent of users with insufficent balance")
     private Double percentOfUsersWithInsufficientBalance = 0.0;
+
+    @XStreamAlias("Percent of users with Insufficient Balance More Than Once")
+    private Double percentOfUsersWithInsufficientBalanceMoreThanOnce = 0.0;
 
     private ArrayList<TransactionDTO> largestTransactions = new ArrayList<>();
 
+    @XStreamOmitField
     private ConcurrentHashMap<String, Integer> errorMap = new ConcurrentHashMap<>();
 
+    @XStreamOmitField
     private ConcurrentHashMap<Long, Boolean> hadInsufficientBalance = new ConcurrentHashMap<>();
 
     public static Analyzer instance = null;
@@ -50,6 +63,23 @@ public class Analyzer {
     public void increaseUsers()
     {
         instance.users += 1;
+    }
+
+    public void calculatePercentages()
+    {
+        Analyzer a = getInstance();
+
+        a.percentOfUsersWithInsufficientBalance = a.hadInsufficientBalance.size()/((double)a.users);
+
+        int countTwice = 0;
+        for (int i = 0; i < users; i ++)
+        {
+            if (hadInsufficientBalance.get((long)i) != null && hadInsufficientBalance.get((long)i))
+            {
+                countTwice += 1;
+            }
+        }
+        a.percentOfUsersWithInsufficientBalanceMoreThanOnce =countTwice/((double)a.users);
     }
 
     public static Analyzer getStaticInstance()
@@ -95,13 +125,13 @@ public class Analyzer {
             {
                 double against = Double.parseDouble(a.largestTransactions.get(9).getAmount().replace("$",""));
                 if (to < against) break;
-
             }
             //discard any that is smaller than t
-            synchronized (Analyzer.class)
+            synchronized (ArrayList.class)
             {
                 while (index < 10)
                 {
+                    a.inLoop++;
                     if (index == a.largestTransactions.size())
                     {
                         a.largestTransactions.add(stored);
@@ -139,7 +169,13 @@ public class Analyzer {
                 //check for insufficient balance and add to map
                 if (key.equals("Insufficient Balance"))
                 {
-                    a.hadInsufficientBalance.put(transaction.getUser(),true);
+                    if (a.hadInsufficientBalance.get(transaction.getUser()) == null)
+                    {
+                        a.hadInsufficientBalance.put(transaction.getUser(),false);
+                    } else {
+                        a.hadInsufficientBalance.put(transaction.getUser(),true);
+                    }
+
                     a.percentOfUsersWithInsufficientBalance = a.hadInsufficientBalance.size()/((double)a.users);
                 }
                 int cnt = a.getErrorMap().get(key);

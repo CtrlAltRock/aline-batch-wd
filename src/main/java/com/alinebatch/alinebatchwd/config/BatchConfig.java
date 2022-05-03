@@ -85,7 +85,7 @@ public class BatchConfig {
     public Step CardCacheStep()
     {
         ThreadPoolTaskExecutor threadTask = new ThreadPoolTaskExecutor();
-            threadTask.setMaxPoolSize(100);
+            threadTask.setMaxPoolSize(250);
             threadTask.setCorePoolSize(6);
             threadTask.afterPropertiesSet();
 
@@ -103,8 +103,8 @@ public class BatchConfig {
     {
 
         ThreadPoolTaskExecutor threadTask = new ThreadPoolTaskExecutor();
-                threadTask.setCorePoolSize(6);
-                threadTask.setMaxPoolSize(100);
+                threadTask.setCorePoolSize(12);
+                threadTask.setMaxPoolSize(1000);
                 threadTask.afterPropertiesSet();
 
                 return stepBuilderFactory.get("multiThreadedStep")
