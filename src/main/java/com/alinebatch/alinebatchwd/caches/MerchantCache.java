@@ -2,12 +2,13 @@ package com.alinebatch.alinebatchwd.caches;
 
 
 import com.alinebatch.alinebatchwd.models.Merchant;
-import com.alinebatch.alinebatchwd.readers.MerchantCacheReader;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.jni.Time;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.AbstractMap;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -15,18 +16,27 @@ public class MerchantCache {
 
    public static MerchantCache instance = null;
 
+   public Long timeLocked = 0L;
+
+
    public static MerchantCache getInstance()
    {
+
        if (instance == null)
        {
+
            synchronized (MerchantCache.class)
            {
+
                if (instance == null)
                {
                    instance = new MerchantCache();
                }
            }
+
+
        }
+
        return instance;
    }
 

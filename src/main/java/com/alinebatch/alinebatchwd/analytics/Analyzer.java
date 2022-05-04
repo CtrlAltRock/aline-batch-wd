@@ -7,8 +7,12 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
@@ -16,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @NoArgsConstructor
 @AllArgsConstructor
 @Slf4j
+@Component
 public class Analyzer {
 
     @XStreamAlias("Number of Merchants")
@@ -32,6 +37,11 @@ public class Analyzer {
     @XStreamAlias("Percent of users with insufficent balance")
     private Double percentOfUsersWithInsufficientBalance = 0.0;
 
+    private HashMap<String, Integer> noFraudMap = new HashMap<>();
+
+    @XStreamOmitField
+    private HashMap<Integer, Double> fraudByYear = new HashMap<>();
+
     @XStreamAlias("Percent of users with Insufficient Balance More Than Once")
     private Double percentOfUsersWithInsufficientBalanceMoreThanOnce = 0.0;
 
@@ -39,6 +49,9 @@ public class Analyzer {
 
     @XStreamOmitField
     private ConcurrentHashMap<String, Integer> errorMap = new ConcurrentHashMap<>();
+
+    @XStreamOmitField
+    private ConcurrentHashMap<Integer, ArrayList<TransactionDTO>> yearMap = new ConcurrentHashMap<>();
 
     @XStreamOmitField
     private ConcurrentHashMap<Long, Boolean> hadInsufficientBalance = new ConcurrentHashMap<>();
@@ -68,9 +81,7 @@ public class Analyzer {
     public void calculatePercentages()
     {
         Analyzer a = getInstance();
-
         a.percentOfUsersWithInsufficientBalance = a.hadInsufficientBalance.size()/((double)a.users);
-
         int countTwice = 0;
         for (int i = 0; i < users; i ++)
         {
@@ -109,12 +120,64 @@ public class Analyzer {
         int index = 0;
         TransactionDTO stored = transaction;
 
+
+
+        //check fraud
+        boolean isFraud = stored.getFraud().equals("Yes");
+        if (!isFraud && stored.getMerchant_state() != "")
+        {
+            if (a.noFraudMap.get(stored.getMerchant_state()) == null)
+            {
+                synchronized (a.noFraudMap)
+                {
+                    log.info("Locked in noFraudMap");
+                    if (a.noFraudMap.get(stored.getMerchant_state()) == null)
+                    {
+                        a.noFraudMap.put(stored.getMerchant_state(), 0);
+                    }
+
+                }
+            }
+            int cnt = a.noFraudMap.get(stored.getMerchant_state());
+            cnt += 1;
+            a.noFraudMap.put(stored.getMerchant_state(), cnt);
+        }
+        if (a.fraudByYear.get(stored.getYear()) == null)
+        {
+            synchronized (a.fraudByYear)
+            {
+                log.info("Locked in fraudByYear");
+                if (a.fraudByYear.get(stored.getYear()) == null)
+                {
+                    a.fraudByYear.put(stored.getYear(), isFraud ? 1.0 : 0.0);
+                }
+            }
+        } else {
+            Double ans = a.fraudByYear.get(stored.getYear()) + (isFraud ? 1.0: 0.0);
+            a.fraudByYear.put(stored.getYear(), ans/2);
+        }
+
         double to = Double.parseDouble(transaction.getAmount().replace("$",""));
         if (to < 0)
         {
             deposits += 1;
         }
+        //place transactions by year
+        /*
+        if (a.yearMap.get(transaction.getYear()) == null)
+        {
+            synchronized (a.yearMap)
+            {
+                log.info("Locked in yearMap");
+                if (a.yearMap.get(transaction.getYear()) == null)
+                {
+                    a.yearMap.put(transaction.getYear(), new ArrayList<>());
+                }
+            }
+        }
 
+        a.yearMap.get(transaction.getYear()).add(transaction);
+        */
 
         //10 Largest Transactions
         while (index < 10)
@@ -132,6 +195,7 @@ public class Analyzer {
                 while (index < 10)
                 {
                     a.inLoop++;
+                    log.info("Looping");
                     if (index == a.largestTransactions.size())
                     {
                         a.largestTransactions.add(stored);
@@ -175,7 +239,6 @@ public class Analyzer {
                     } else {
                         a.hadInsufficientBalance.put(transaction.getUser(),true);
                     }
-
                     a.percentOfUsersWithInsufficientBalance = a.hadInsufficientBalance.size()/((double)a.users);
                 }
                 int cnt = a.getErrorMap().get(key);

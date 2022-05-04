@@ -13,5 +13,6 @@ This microservice is responsible for generating relevant data and persisting it 
 
 Clone this repository onto your machine, you will need to change some environment variables.
 
-//WHEN COMPLETED ADD INSTRUCTIONS FOR CHANGING ENVIRONMENT VARIABLES
+Within "application.properties" you will need to change
+    inFile is the path 
 

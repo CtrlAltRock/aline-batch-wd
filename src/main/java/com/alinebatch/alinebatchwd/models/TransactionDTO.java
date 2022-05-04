@@ -40,6 +40,7 @@ public class TransactionDTO {
         t.setMonth(month);
         t.setTime(time);
         t.setMethod(method);
+        t.setMerchant_state(merchant_state);
         t.setMerchant_city(merchant_city);
         t.setMerchant_name(merchant_name);
         t.setMerchant_zip(merchant_zip);
