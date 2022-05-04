@@ -11,5 +11,4 @@ public class Querier {
     {
         return new QueryList(ofType);
     }
-
 }

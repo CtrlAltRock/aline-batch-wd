@@ -1,16 +1,14 @@
 package com.alinebatch.alinebatchwd.analytics;
 
 
-import com.alinebatch.alinebatchwd.models.Transaction;
 import com.alinebatch.alinebatchwd.models.TransactionDTO;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,6 +21,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class Analyzer {
 
+    @Value("${TopTransactions}")
+    private int topTransactionCount;
+
     @XStreamAlias("Number of Merchants")
     private Long merchants = 0L;
 
@@ -33,6 +34,8 @@ public class Analyzer {
     private int deposits = 0;
 
     private int inLoop = 0;
+
+    public ArrayList<Object> transactions = new ArrayList<>();
 
     @XStreamAlias("Percent of users with insufficent balance")
     private Double percentOfUsersWithInsufficientBalance = 0.0;
@@ -58,7 +61,7 @@ public class Analyzer {
 
     public static Analyzer instance = null;
 
-    public Analyzer getInstance()
+    public static Analyzer getInstance()
     {
         if (instance == null)
         {
@@ -67,6 +70,14 @@ public class Analyzer {
                 if (instance == null)
                 {
                     instance = new Analyzer();
+                    log.info(instance.topTransactionCount + "");
+                    try
+                    {
+                        Thread.sleep(10000);
+                    } catch (Exception e) {
+
+                    }
+
                 }
             }
         }
@@ -114,12 +125,14 @@ public class Analyzer {
         getInstance().merchants += 1L;
     }
 
+
     public void processTransaction(TransactionDTO transaction)
     {
         Analyzer a = getInstance();
         int index = 0;
         TransactionDTO stored = transaction;
-
+        stored.setAmount(stored.getAmount().replace("$",""));
+        a.transactions.add(stored);
 
 
         //check fraud
@@ -180,9 +193,10 @@ public class Analyzer {
         */
 
         //10 Largest Transactions
+
+
         while (index < 10)
         {
-
             //discard anything that is smaller than the last indexed transaction
             if (a.largestTransactions.size() == 10)
             {
@@ -192,17 +206,17 @@ public class Analyzer {
             //discard any that is smaller than t
             synchronized (ArrayList.class)
             {
+                log.info("Looping");
                 while (index < 10)
                 {
                     a.inLoop++;
-                    log.info("Looping");
                     if (index == a.largestTransactions.size())
                     {
                         a.largestTransactions.add(stored);
                         break;
                     }
-                    double against = Double.parseDouble(a.largestTransactions.get(index).getAmount().replace("$",""));
-                    if (against < to)
+                    double queriedValue = Double.parseDouble(a.largestTransactions.get(index).getAmount().replace("$",""));
+                    if (queriedValue < to)
                     {
                         TransactionDTO transfer = a.largestTransactions.get(index);
                         a.largestTransactions.set(index,stored);
