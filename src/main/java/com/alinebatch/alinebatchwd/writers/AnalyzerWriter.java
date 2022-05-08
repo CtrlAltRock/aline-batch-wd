@@ -41,13 +41,15 @@ public class AnalyzerWriter implements Tasklet
         xs.omitField(Analyzer.class,"yearMap");
         xs.omitField(Analyzer.class,"noFraud");
         xs.omitField(Analyzer.class,"transactions");
+        xs.omitField(Analyzer.class, "noFraudMapYear");
+        xs.omitField(Analyzer.class, "fraudMapYear");
         xs.aliasField("Number_Of_Deposits" ,Analyzer.class,"deposits");
         xs.aliasField("Number_Of_Merchants" ,Analyzer.class,"merchants");
         xs.aliasField("Number_Of_Users" ,Analyzer.class,"users");
         xs.aliasField("Percent_of_Users_with_Insufficent_Balance" ,Analyzer.class,"percentOfUsersWithInsufficientBalance");
         xs.aliasField("Percent_of_Users_with_Insufficent_Balance_More_Than_Once" ,Analyzer.class,"percentOfUsersWithInsufficientBalanceMoreThanOnce");
         xs.aliasField("Top_" + topTransactions + "_Ordered_By_Value" ,Analyzer.class,"largestTransactions");
-        xs.aliasField("Total_Transactions_Grouped_By_State_That_Had_No_Fraud", Analyzer.class,"noFraudMap");
+        xs.aliasField("Total_Transactions_Grouped_By_State_That_Had_No_Fraud", Analyzer.class,"noFraudMapState");
         xs.alias("Transaction", TransactionDTO.class);
 
         FileOutputStream fos = new FileOutputStream("/Users/willemduiker/IdeaProjects/aline-batch-wd/src/main/resources/analysis.xml",true);

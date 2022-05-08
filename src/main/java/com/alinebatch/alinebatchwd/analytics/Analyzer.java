@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,15 +36,21 @@ public class Analyzer {
 
     private int inLoop = 0;
 
+    private static final DecimalFormat df = new DecimalFormat("0.00");
+
     public ArrayList<Object> transactions = new ArrayList<>();
 
     @XStreamAlias("Percent of users with insufficent balance")
     private Double percentOfUsersWithInsufficientBalance = 0.0;
 
-    private HashMap<String, Integer> noFraudMap = new HashMap<>();
+    private HashMap<String, Integer> noFraudMapYear = new HashMap<>();
+
+    private HashMap<String, Integer> fraudMapYear = new HashMap<>();
+
+    private HashMap<String, Integer> noFraudMapState = new HashMap<>();
 
     @XStreamOmitField
-    private HashMap<Integer, Double> fraudByYear = new HashMap<>();
+    private HashMap<String, String> fraudByYear = new HashMap<>();
 
     @XStreamAlias("Percent of users with Insufficient Balance More Than Once")
     private Double percentOfUsersWithInsufficientBalanceMoreThanOnce = 0.0;
@@ -70,14 +77,6 @@ public class Analyzer {
                 if (instance == null)
                 {
                     instance = new Analyzer();
-                    log.info(instance.topTransactionCount + "");
-                    try
-                    {
-                        Thread.sleep(10000);
-                    } catch (Exception e) {
-
-                    }
-
                 }
             }
         }
@@ -102,6 +101,19 @@ public class Analyzer {
             }
         }
         a.percentOfUsersWithInsufficientBalanceMoreThanOnce =countTwice/((double)a.users);
+        fraudPercentages();
+
+    }
+
+    public void fraudPercentages()
+    {
+        Analyzer a = getInstance();
+        a.fraudMapYear.forEach((k,v) ->
+                {
+                    int total = v + a.noFraudMapYear.get(k);
+                    String percent = df.format(((double)v)/((double)total)* 100.0);
+                    a.fraudByYear.put(k,"%" + percent);
+                });
     }
 
     public static Analyzer getStaticInstance()
@@ -137,37 +149,52 @@ public class Analyzer {
 
         //check fraud
         boolean isFraud = stored.getFraud().equals("Yes");
+        String year = transaction.getYear() + "";
+
+        //Check if year exists in both fraud maps
+        if (a.noFraudMapYear.get(year) == null)
+        {
+            synchronized (a.noFraudMapYear)
+            {
+                if (a.noFraudMapYear.get(year) == null)
+                {
+                    a.noFraudMapYear.put(year,0);
+                }
+            }
+        }
+        int cnt = (isFraud ? 0 : 1) + a.noFraudMapYear.get(year);
+        a.noFraudMapYear.put(year, cnt);
+
+        if (a.fraudMapYear.get(year) == null)
+        {
+            synchronized (a.fraudMapYear)
+            {
+                if (a.fraudMapYear.get(year) == null)
+                {
+                    a.fraudMapYear.put(year,0);
+                }
+            }
+        }
+        cnt = (isFraud ? 1 : 0) + a.fraudMapYear.get(year);
+        a.fraudMapYear.put(year, cnt);
+
+
         if (!isFraud && stored.getMerchant_state() != "")
         {
-            if (a.noFraudMap.get(stored.getMerchant_state()) == null)
+            if (a.noFraudMapState.get(stored.getMerchant_state()) == null)
             {
-                synchronized (a.noFraudMap)
+                synchronized (a.noFraudMapState)
                 {
-                    log.info("Locked in noFraudMap");
-                    if (a.noFraudMap.get(stored.getMerchant_state()) == null)
+                    if (a.noFraudMapState.get(stored.getMerchant_state()) == null)
                     {
-                        a.noFraudMap.put(stored.getMerchant_state(), 0);
+                        a.noFraudMapState.put(stored.getMerchant_state(), 0);
                     }
 
                 }
             }
-            int cnt = a.noFraudMap.get(stored.getMerchant_state());
+            cnt = a.noFraudMapState.get(stored.getMerchant_state());
             cnt += 1;
-            a.noFraudMap.put(stored.getMerchant_state(), cnt);
-        }
-        if (a.fraudByYear.get(stored.getYear()) == null)
-        {
-            synchronized (a.fraudByYear)
-            {
-                log.info("Locked in fraudByYear");
-                if (a.fraudByYear.get(stored.getYear()) == null)
-                {
-                    a.fraudByYear.put(stored.getYear(), isFraud ? 1.0 : 0.0);
-                }
-            }
-        } else {
-            Double ans = a.fraudByYear.get(stored.getYear()) + (isFraud ? 1.0: 0.0);
-            a.fraudByYear.put(stored.getYear(), ans/2);
+            a.noFraudMapState.put(stored.getMerchant_state(), cnt);
         }
 
         double to = Double.parseDouble(transaction.getAmount().replace("$",""));
@@ -203,10 +230,8 @@ public class Analyzer {
                 double against = Double.parseDouble(a.largestTransactions.get(9).getAmount().replace("$",""));
                 if (to < against) break;
             }
-            //discard any that is smaller than t
             synchronized (ArrayList.class)
             {
-                log.info("Looping");
                 while (index < 10)
                 {
                     a.inLoop++;
@@ -255,7 +280,7 @@ public class Analyzer {
                     }
                     a.percentOfUsersWithInsufficientBalance = a.hadInsufficientBalance.size()/((double)a.users);
                 }
-                int cnt = a.getErrorMap().get(key);
+                cnt = a.getErrorMap().get(key);
                 a.getErrorMap().put(key, ++cnt);
             }
         }

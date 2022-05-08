@@ -100,7 +100,7 @@ public class BatchConfig {
     {
 
         ThreadPoolTaskExecutor threadTask = new ThreadPoolTaskExecutor();
-                threadTask.setCorePoolSize(1);
+                threadTask.setCorePoolSize(6);
                 threadTask.setMaxPoolSize(250);
                 threadTask.afterPropertiesSet();
 
