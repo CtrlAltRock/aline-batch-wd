@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +22,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Component
 public class Analyzer {
+
+
+    private HashMap<String, Integer> zipMap = new HashMap<>();
+
+    private ArrayList<String> topZips = new ArrayList<>();
 
     @Value("${TopTransactions}")
     private int topTransactionCount;
@@ -88,6 +94,31 @@ public class Analyzer {
         instance.users += 1;
     }
 
+    public void processZip(TransactionDTO transaction)
+    {
+        Analyzer a = getInstance();
+        String zip = transaction.getMerchant_zip();
+        if (zip.equals("")) return;
+        if (a.zipMap.get(zip) == null)
+        {
+            synchronized (a.zipMap)
+            {
+                if (a.zipMap.get(zip) == null)
+                {
+                    a.zipMap.put(zip, 0);
+                }
+
+            }
+        }
+        int cnt = a.zipMap.get(zip) + 1;
+        a.zipMap.put(zip, cnt);
+    }
+
+    public void calculateTotals()
+    {
+
+    }
+
     public void calculatePercentages()
     {
         Analyzer a = getInstance();
@@ -102,8 +133,10 @@ public class Analyzer {
         }
         a.percentOfUsersWithInsufficientBalanceMoreThanOnce =countTwice/((double)a.users);
         fraudPercentages();
-
+        a.topZips = QueryList.getTopX(zipMap,5);
     }
+
+
 
     public void fraudPercentages()
     {
@@ -137,6 +170,11 @@ public class Analyzer {
         getInstance().merchants += 1L;
     }
 
+    public void calculateFraud(TransactionDTO transaction)
+    {
+
+    }
+
 
     public void processTransaction(TransactionDTO transaction)
     {
@@ -145,6 +183,8 @@ public class Analyzer {
         TransactionDTO stored = transaction;
         stored.setAmount(stored.getAmount().replace("$",""));
         a.transactions.add(stored);
+
+        processZip(transaction);
 
 
         //check fraud

@@ -43,6 +43,7 @@ public class AnalyzerWriter implements Tasklet
         xs.omitField(Analyzer.class,"transactions");
         xs.omitField(Analyzer.class, "noFraudMapYear");
         xs.omitField(Analyzer.class, "fraudMapYear");
+        xs.omitField(Analyzer.class,"zipMap");
         xs.aliasField("Number_Of_Deposits" ,Analyzer.class,"deposits");
         xs.aliasField("Number_Of_Merchants" ,Analyzer.class,"merchants");
         xs.aliasField("Number_Of_Users" ,Analyzer.class,"users");

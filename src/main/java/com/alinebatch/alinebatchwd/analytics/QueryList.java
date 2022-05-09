@@ -3,6 +3,7 @@ package com.alinebatch.alinebatchwd.analytics;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -33,6 +34,61 @@ public class QueryList {
         this.collection = collection;
         return this;
     }
+
+    public static ArrayList<String> getTopX(HashMap<String, Integer> collection, Integer count)
+    {
+        ArrayList<String> topX = new ArrayList<>();
+        collection.forEach((key, value) ->
+        {
+
+            int i = 0;
+            int storedVal = value;
+            String storedString = key + " " + value;
+            while (i < count)
+            {
+                log.info(storedString);
+                if (topX.size() == count)
+                {
+                    if (storedVal < decode(topX.get(count - 1)))
+                    {
+                        break;
+                    }
+                }
+                while (i < count)
+                {
+                    if (i == topX.size())
+                    {
+                        //log.info(storedString);
+                        topX.add(storedString);
+                        break;
+                    }
+                    int queriedValue = decode(topX.get(i));
+                    if (queriedValue< storedVal)
+                    {
+                        String newString = topX.get(i);
+                        topX.set(i, storedString);
+                        storedString = newString;
+                        storedVal = queriedValue;
+                    }
+                    i++;
+                }
+            }
+        });
+
+        return topX;
+    }
+
+    public static Integer decode(String entry)
+    {
+        try {
+            return Integer.parseInt(entry.split(" ")[1]);
+        } catch (Exception e)
+        {
+            log.info("Empty or malformed value, returning default 0");
+            return 0;
+        }
+    }
+
 
     public HashMap<String, Integer> countBy(String field)
     {
