@@ -7,12 +7,13 @@ import com.alinebatch.alinebatchwd.generators.GeneratorBean;
 import com.alinebatch.alinebatchwd.models.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.support.CompositeItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.constraints.Null;
 
 @Slf4j
-public class TransactionProcessor implements ItemProcessor<TransactionDTO, TransactionDTO> {
+public class TransactionProcessor extends CompositeItemProcessor<TransactionDTO, TransactionDTO> {
 
 
     static GeneratorBean generatorBean = new GeneratorBean();

@@ -20,7 +20,10 @@ public class StateItemWriter extends AbstractItemStreamItemWriter {
         xs.alias("state", State.class);
         FileOutputStream fos = new FileOutputStream("/Users/willemduiker/IdeaProjects/aline-batch-wd/src/main/resources/stateOutput.xml",true);
         list.forEach((t) -> {
+            synchronized (XStream.class)
+            {
                 xs.toXML(t, fos);
+            }
         });
     }
 }

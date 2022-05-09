@@ -16,6 +16,8 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 
 @Component
@@ -49,6 +51,7 @@ public class GeneratorBean {
                         User user = new ObjectMapper().readValue(input, User.class);
                         analyzer.increaseUsers();
                         userCache.set(id, user);
+                        log.info(id + "");
                         return user;
                     } catch (Exception e) {
                         log.info(e.getMessage());
@@ -87,6 +90,7 @@ public class GeneratorBean {
     {
         if (merchantCache.get(name) == null)
         {
+            Instant start = Instant.now();
             synchronized (MerchantCache.class) {
                 if (merchantCache.get(name) == null)
                 {
@@ -104,6 +108,8 @@ public class GeneratorBean {
                     analyzer.addMerchant();
                 }
             }
+            Instant end = Instant.now();
+            MerchantCache.getInstance().timeLocked += (Duration.between(start,end).toMillis());
         }
         return merchantCache.get(name);
     }

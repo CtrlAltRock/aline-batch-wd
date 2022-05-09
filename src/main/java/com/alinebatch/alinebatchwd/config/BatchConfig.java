@@ -13,7 +13,6 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileParseException;
@@ -31,10 +30,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.oxm.xstream.XStreamMarshaller;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 
 @Configuration
 @EnableBatchProcessing
@@ -103,12 +100,12 @@ public class BatchConfig {
     {
 
         ThreadPoolTaskExecutor threadTask = new ThreadPoolTaskExecutor();
-                threadTask.setCorePoolSize(12);
-                threadTask.setMaxPoolSize(1000);
+                threadTask.setCorePoolSize(6);
+                threadTask.setMaxPoolSize(250);
                 threadTask.afterPropertiesSet();
 
                 return stepBuilderFactory.get("multiThreadedStep")
-                        .<TransactionDTO,Object>chunk(100)
+                        .<TransactionDTO,Object>chunk(1000)
                         .reader(CsvReader())
                         .processor(new TransactionProcessor())
                         .writer(new UserXmlItemWriter())
@@ -215,6 +212,7 @@ public class BatchConfig {
 
     @Bean
     public AnalyzerWriter doAnalysis() { return new AnalyzerWriter();}
+
     @Bean
     public Job buildJob()
     {

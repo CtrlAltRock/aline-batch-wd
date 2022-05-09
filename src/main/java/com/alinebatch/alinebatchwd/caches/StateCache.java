@@ -1,12 +1,14 @@
 package com.alinebatch.alinebatchwd.caches;
 
 import com.alinebatch.alinebatchwd.models.State;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Map;
 
 import static java.util.Map.entry;
 
+@Slf4j
 public class StateCache {
 
     public static StateCache instance = null;
@@ -17,6 +19,7 @@ public class StateCache {
         {
             synchronized (StateCache.class)
             {
+                log.info("Locked in state Cache");
                 if (instance == null)
                 {
                     instance = new StateCache();

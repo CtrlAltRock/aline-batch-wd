@@ -17,6 +17,7 @@ public class UserCache {
             {
                 if (instance == null)
                 {
+
                     instance = new UserCache();
                 }
             }
@@ -31,6 +32,11 @@ public class UserCache {
     public User get(Long id)
     {
         return UserCache.getInstance().cacheMap.get(id);
+    }
+
+    public ArrayList<Object> collect()
+    {
+        return new ArrayList<Object>(Arrays.asList(UserCache.getInstance().cacheMap.values().toArray()));
     }
 
     public User set(Long id, User user)
