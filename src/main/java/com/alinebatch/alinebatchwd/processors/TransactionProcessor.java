@@ -2,6 +2,7 @@ package com.alinebatch.alinebatchwd.processors;
 
 
 import com.alinebatch.alinebatchwd.analytics.Analyzer;
+import com.alinebatch.alinebatchwd.caches.MerchantCache;
 import com.alinebatch.alinebatchwd.caches.StateCache;
 import com.alinebatch.alinebatchwd.generators.GeneratorBean;
 import com.alinebatch.alinebatchwd.models.*;
@@ -34,10 +35,16 @@ public class TransactionProcessor extends CompositeItemProcessor<TransactionDTO,
             stateCache.getInstance().putZip(transactionD.getMerchant_state(),transactionD.getMerchant_zip());
 
         }
-        analyzer.processTransaction(transactionD);
         long userId = transactionD.getUser();
         long cardId = transactionD.getCard();
-        User u = generatorBean.getUser(userId);
+        UserDTO u = generatorBean.getUser(userId);
+        //do analysis
+        u =  Analyzer.tallyInsufficient(u, transactionD);
+        analyzer.processSpecific(transactionD);
+        analyzer.getTypes(transactionD);
+        analyzer.processTopX(transactionD);
+        analyzer.countNoFraudByState(transactionD);
+        analyzer.processZip(transactionD);
         Card c = generatorBean.getCard(userId,cardId);
         Merchant m = generatorBean.getMerchant(transactionD.getMerchant_name(), transactionD);
         return transactionD;

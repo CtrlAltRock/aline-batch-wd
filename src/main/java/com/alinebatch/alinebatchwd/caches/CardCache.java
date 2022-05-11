@@ -43,7 +43,9 @@ public class CardCache {
                 }
             }
         }
-        return CardCache.getInstance().cacheMap.get(userId).get(cardId);}
+        return CardCache.getInstance().cacheMap.get(userId).get(cardId);
+    }
+
 
     public Card set(Long userId, Long cardId, Card card)
     {

@@ -31,8 +31,8 @@ public class TransactionDTO {
     public Transaction toTransaction()
     {
         Transaction t = new Transaction();
-        t.setUser(UserCache.getInstance().get(user));
-        t.setCard(CardCache.getInstance().get(user,card));
+        //t.setUser(UserCache.getInstance().get(user));
+        //t.setCard(CardCache.getInstance().get(user,card));
         t.setYear(year);
         t.setAmount(amount);
         t.setDay(day);

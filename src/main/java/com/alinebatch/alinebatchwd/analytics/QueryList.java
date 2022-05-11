@@ -46,7 +46,6 @@ public class QueryList {
             String storedString = key + " " + value;
             while (i < count)
             {
-                log.info(storedString);
                 if (topX.size() == count)
                 {
                     if (storedVal < decode(topX.get(count - 1)))
@@ -58,7 +57,7 @@ public class QueryList {
                 {
                     if (i == topX.size())
                     {
-                        //log.info(storedString);
+
                         topX.add(storedString);
                         break;
                     }

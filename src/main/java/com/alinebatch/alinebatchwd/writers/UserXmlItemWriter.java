@@ -16,8 +16,6 @@ import java.util.List;
 @Slf4j
 public class UserXmlItemWriter extends AbstractItemStreamItemWriter {
 
-    private static UserCache userCache = new UserCache();
-
     @Override
     public void write(List list) throws Exception {
             }

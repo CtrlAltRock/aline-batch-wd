@@ -36,7 +36,6 @@ public class AnalyzerWriter implements Tasklet
         XStream xs = new XStream();
         xs.alias("Analyzer",Analyzer.class);
         xs.omitField(Analyzer.class, "errorMap");
-        xs.omitField(Analyzer.class,"hadInsufficientBalance");
         xs.omitField(Analyzer.class,"inLoop");
         xs.omitField(Analyzer.class,"yearMap");
         xs.omitField(Analyzer.class,"noFraud");
@@ -44,11 +43,17 @@ public class AnalyzerWriter implements Tasklet
         xs.omitField(Analyzer.class, "noFraudMapYear");
         xs.omitField(Analyzer.class, "fraudMapYear");
         xs.omitField(Analyzer.class,"zipMap");
+        xs.omitField(Analyzer.class,"ibOnce");
+        xs.omitField(Analyzer.class,"ibMore");
+        xs.omitField(Analyzer.class,"userCount");
+        xs.omitField(Analyzer.class,"typeMap");
+        xs.aliasField("Most_Transactions_Grouped_By_Zipcode", Analyzer.class,"topZips");
+        xs.aliasField("All_Transactions_Over_100_Occuring_After_8_PM_Grouped_By_Zipcode_and_Online", Analyzer.class,"specificMap");
         xs.aliasField("Number_Of_Deposits" ,Analyzer.class,"deposits");
         xs.aliasField("Number_Of_Merchants" ,Analyzer.class,"merchants");
         xs.aliasField("Number_Of_Users" ,Analyzer.class,"users");
-        xs.aliasField("Percent_of_Users_with_Insufficent_Balance" ,Analyzer.class,"percentOfUsersWithInsufficientBalance");
-        xs.aliasField("Percent_of_Users_with_Insufficent_Balance_More_Than_Once" ,Analyzer.class,"percentOfUsersWithInsufficientBalanceMoreThanOnce");
+        xs.aliasField("Percent_of_Users_with_Insufficent_Balance" ,Analyzer.class,"PercentIbOnce");
+        xs.aliasField("Percent_of_Users_with_Insufficent_Balance_More_Than_Once" ,Analyzer.class,"PercentIbMore");
         xs.aliasField("Top_" + topTransactions + "_Ordered_By_Value" ,Analyzer.class,"largestTransactions");
         xs.aliasField("Total_Transactions_Grouped_By_State_That_Had_No_Fraud", Analyzer.class,"noFraudMapState");
         xs.alias("Transaction", TransactionDTO.class);
