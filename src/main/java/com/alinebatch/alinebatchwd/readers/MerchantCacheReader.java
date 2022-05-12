@@ -20,19 +20,17 @@ public class MerchantCacheReader<T> implements ItemReader<T> {
 
     MerchantCache merchantCache;
 
-    public MerchantCacheReader(MerchantCache merchantCache) {this.merchantCache = merchantCache;}
+    public MerchantCacheReader() {this.merchantCache = MerchantCache.getInstance();}
 
     public T read() throws Exception
     {
-        while (index < merchantCache.getAll().size())
+        while (index < merchantCache.getAll().size() - 1)
         {
             synchronized (MerchantCache.class)
             {
-                if (index < merchantCache.getAll().size())
+                if (index < merchantCache.getAll().size() - 1)
                 {
-                    Merchant m = merchantCache.getById(index);
-                    index += 1L;
-                    return (T)m;
+
                 }
             }
         }

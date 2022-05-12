@@ -35,7 +35,6 @@ public class BasicCloser implements Tasklet {
         XMLPrepper.close(stateOut, "states");
         XMLPrepper.close(merchantOut, "merchants");
         XMLPrepper.close(analysisOut, "analysis");
-        log.info("Time in merchant Lock " + MerchantCache.getInstance().timeLocked + "ms");
         return RepeatStatus.FINISHED;
     }
 }

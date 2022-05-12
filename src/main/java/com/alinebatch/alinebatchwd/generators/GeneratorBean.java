@@ -37,7 +37,7 @@ public class GeneratorBean {
 
     private Analyzer analyzer = new Analyzer();
 
-    public User getUser(long id) throws Exception {
+    public UserDTO getUser(long id) throws Exception {
         if (userCache.get(id) == null) {
             synchronized (UserCache.class) {
                 if (userCache.get(id) == null) {
@@ -48,8 +48,8 @@ public class GeneratorBean {
                         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
                         String input;
                         input = in.readLine();
-                        User user = new ObjectMapper().readValue(input, User.class);
-                        analyzer.increaseUsers();
+                        UserDTO user = new ObjectMapper().readValue(input, UserDTO.class);
+                        user.setIbCount(0);
                         userCache.set(id, user);
                         log.info(id + "");
                         return user;
@@ -90,7 +90,6 @@ public class GeneratorBean {
     {
         if (merchantCache.get(name) == null)
         {
-            Instant start = Instant.now();
             synchronized (MerchantCache.class) {
                 if (merchantCache.get(name) == null)
                 {
@@ -108,8 +107,6 @@ public class GeneratorBean {
                     analyzer.addMerchant();
                 }
             }
-            Instant end = Instant.now();
-            MerchantCache.getInstance().timeLocked += (Duration.between(start,end).toMillis());
         }
         return merchantCache.get(name);
     }

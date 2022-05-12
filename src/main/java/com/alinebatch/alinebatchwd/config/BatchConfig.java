@@ -13,6 +13,9 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.FlowBuilder;
+import org.springframework.batch.core.job.flow.Flow;
+import org.springframework.batch.core.job.flow.support.SimpleFlow;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileParseException;
@@ -27,6 +30,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.oxm.xstream.XStreamMarshaller;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -45,6 +50,25 @@ public class BatchConfig {
 
     @Value("${inFile}")
     String inFilePath;
+
+    @Bean
+    TaskExecutor multiThreadedExecutor()
+    {
+        ThreadPoolTaskExecutor threadTask = new ThreadPoolTaskExecutor();
+        threadTask.setMaxPoolSize(6);
+        threadTask.setCorePoolSize(6);
+        threadTask.afterPropertiesSet();
+        return threadTask;
+    }
+
+    @Bean
+    TaskExecutor basicTaskExecutor()
+    {
+        return new SimpleAsyncTaskExecutor("SimpleAsyncTask");
+    }
+
+    //Multi Threaded Steps
+
 
     @Bean
     public ItemWriter<Card> cardWriter()
@@ -78,34 +102,13 @@ public class BatchConfig {
                 .build();
     }
 
-    @Bean
-    public Step CardCacheStep()
-    {
-        ThreadPoolTaskExecutor threadTask = new ThreadPoolTaskExecutor();
-            threadTask.setMaxPoolSize(250);
-            threadTask.setCorePoolSize(6);
-            threadTask.afterPropertiesSet();
 
-            return stepBuilderFactory.get("cardCacheStep")
-                    .<User, HashMap<Long, Card>>chunk(10000)
-                    .reader(new UserCacheReader<>(UserCache.getInstance().getAll()))
-                    .processor(new CardCacheProcessor())
-                    .writer(new CardItemWriter())
-                    .taskExecutor(threadTask)
-                    .build();
-    }
 
     @Bean
     public Step multiThreadedStep()
     {
-
-        ThreadPoolTaskExecutor threadTask = new ThreadPoolTaskExecutor();
-                threadTask.setCorePoolSize(6);
-                threadTask.setMaxPoolSize(250);
-                threadTask.afterPropertiesSet();
-
                 return stepBuilderFactory.get("multiThreadedStep")
-                        .<TransactionDTO,Object>chunk(1000)
+                        .<TransactionDTO,Object>chunk(10000)
                         .reader(CsvReader())
                         .processor(new TransactionProcessor())
                         .writer(new UserXmlItemWriter())
@@ -116,58 +119,92 @@ public class BatchConfig {
                         .skip(ParameterMappingException.class)
                         .skip(FlatFileFormatException.class)
                         .skip(FlatFileParseException.class)
-                        .taskExecutor(threadTask)
+                        .taskExecutor(multiThreadedExecutor())
                         .build();
+    }
+
+    //Flow Definition
+    //writer flow
+    @Bean
+    public Flow aggregateFLow() {
+        return new FlowBuilder<SimpleFlow>("aggregateFlow")
+                .split(multiThreadedExecutor())
+                .add(UserFlow(),CardFlow(),MerchantFlow(),StateFlow())
+                .build();
+    }
+
+    @Bean
+    public Flow UserFlow() {
+        return new FlowBuilder<SimpleFlow>("UserFlow")
+                .start(UserCacheStep())
+                .build();
+    }
+
+    @Bean
+    public Flow CardFlow() {
+        return new FlowBuilder<SimpleFlow>("CardFlow")
+                .start(CardCacheStep())
+                .build();
+    }
+
+    @Bean
+    public Flow MerchantFlow() {
+        return new FlowBuilder<SimpleFlow>("MerchantFlow")
+                .start(MerchantCacheStep())
+                .build();
+    }
+
+    @Bean
+    public Flow StateFlow() {
+        return new FlowBuilder<SimpleFlow>("StateFlow")
+                .start(StateCacheStep())
+                .build();
+    }
+
+
+    //single threaded Steps
+    @Bean
+    public Step CardCacheStep()
+    {
+        return stepBuilderFactory.get("cardCacheStep")
+                .<UserDTO, HashMap<Long, Card>>chunk(10000)
+                .reader(new UserCacheReader<>(UserCache.getInstance().getAll()))
+                .processor(new CardCacheProcessor())
+                .writer(new CardItemWriter())
+                .taskExecutor(basicTaskExecutor())
+                .build();
     }
 
     @Bean
     public Step StateCacheStep()
     {
-        ThreadPoolTaskExecutor threadTask = new ThreadPoolTaskExecutor();
-        threadTask.setCorePoolSize(6);
-        threadTask.setMaxPoolSize(250);
-        threadTask.afterPropertiesSet();
 
         return stepBuilderFactory.get("stateCacheStep")
                 .<State, Object>chunk(10000)
                 .reader(new StateCacheReader<State>(StateCache.getInstance().getAll().values().iterator()))
                 .processor(new StateCacheProcessor())
                 .writer(new StateItemWriter())
-                .taskExecutor(threadTask)
+                .taskExecutor(basicTaskExecutor())
                 .build();
     }
 
     @Bean
     public Step UserCacheStep()
     {
-        ThreadPoolTaskExecutor threadTask = new ThreadPoolTaskExecutor();
-        threadTask.setCorePoolSize(6);
-        threadTask.setMaxPoolSize(250);
-        threadTask.afterPropertiesSet();
-
         return stepBuilderFactory.get("userCacheStep")
-                .<User, Object>chunk(10000)
+                .<UserDTO, Object>chunk(10000)
                 .reader(new UserCacheReader<>(UserCache.getInstance().getAll()))
-                .processor(new UserCacheProcessor())
+                .processor(new UserAggregateProcessor())
                 .writer(new GeneralXmlWriter())
-                .taskExecutor(threadTask)
+                .taskExecutor(basicTaskExecutor())
                 .build();
     }
 
     @Bean
     public Step MerchantCacheStep()
     {
-        ThreadPoolTaskExecutor threadTask = new ThreadPoolTaskExecutor();
-        threadTask.setCorePoolSize(6);
-        threadTask.setMaxPoolSize(250);
-        threadTask.afterPropertiesSet();
-
         return stepBuilderFactory.get("merchantCacheStep")
-                .<Merchant, Merchant>chunk(10000)
-                .reader(new MerchantCacheReader<Merchant>(new MerchantCache()))
-                //.processor(new MerchantCacheProcessor())
-                .writer(new MerchantCacheWriter())
-                .taskExecutor(threadTask)
+                .tasklet(new MerchantTasklet())
                 .build();
     }
 
@@ -184,10 +221,21 @@ public class BatchConfig {
     public Step analysisStep()
     {
         return stepBuilderFactory
-                .get("output_analysis")
-                .tasklet(doAnalysis())
+                .get("calculate_analysis")
+                .tasklet(new AnalysisTasklet())
                 .build();
     }
+
+    @Bean
+    public Step analysisWrite()
+    {
+        return stepBuilderFactory
+                .get("write_analysis")
+                .tasklet(new AnalyzerWriter())
+                .build();
+    }
+
+
 
     @Bean
     public Step CloseStep()
@@ -217,14 +265,13 @@ public class BatchConfig {
     public Job buildJob()
     {
         return jobBuilderFactory.get("transactionJob")
-                .start(PrepStep())
+                .flow(PrepStep())
                 .next(multiThreadedStep())
-                .next(MerchantCacheStep())
-                .next(UserCacheStep())
-                .next(CardCacheStep())
-                .next(StateCacheStep())
+                .next(aggregateFLow())
                 .next(analysisStep())
+                .next(analysisWrite())
                 .next(CloseStep())
+                .end()
                 .build();
     }
 }

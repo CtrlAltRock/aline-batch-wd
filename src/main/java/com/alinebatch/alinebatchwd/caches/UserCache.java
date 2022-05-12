@@ -1,6 +1,7 @@
 package com.alinebatch.alinebatchwd.caches;
 
 import com.alinebatch.alinebatchwd.models.User;
+import com.alinebatch.alinebatchwd.models.UserDTO;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,11 +26,11 @@ public class UserCache {
         return instance;
     }
 
-    private AbstractMap<Long, User> cacheMap = new ConcurrentHashMap<>();
+    private AbstractMap<Long, UserDTO> cacheMap = new ConcurrentHashMap<>();
 
     private HashSet<Long> seenCache = new HashSet<>();
 
-    public User get(Long id)
+    public UserDTO get(Long id)
     {
         return UserCache.getInstance().cacheMap.get(id);
     }
@@ -39,13 +40,13 @@ public class UserCache {
         return new ArrayList<Object>(Arrays.asList(UserCache.getInstance().cacheMap.values().toArray()));
     }
 
-    public User set(Long id, User user)
+    public UserDTO set(Long id, UserDTO user)
     {
         UserCache.getInstance().cacheMap.put(id, user);
         return user;
     }
 
-    public AbstractMap<Long, User> getAll()
+    public AbstractMap<Long, UserDTO> getAll()
     {
         return UserCache.getInstance().cacheMap;
     }

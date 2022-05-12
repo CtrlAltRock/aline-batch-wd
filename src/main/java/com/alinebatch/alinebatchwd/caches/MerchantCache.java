@@ -16,32 +16,17 @@ public class MerchantCache {
 
    public static MerchantCache instance = null;
 
-   public Long timeLocked = 0L;
-
 
    public static MerchantCache getInstance()
    {
-
-       if (instance == null)
-       {
-
-           synchronized (MerchantCache.class)
-           {
-
                if (instance == null)
                {
                    instance = new MerchantCache();
                }
-           }
-
-
-       }
-
        return instance;
    }
 
-   private AbstractMap<String, Merchant> merchantMap = new ConcurrentHashMap<>();
-   private HashMap<Long, String> merchantIndex = new HashMap<>();
+   public HashMap<String, Merchant> merchantMap = new HashMap<>();
 
    public Merchant get(String name)
    {
@@ -51,14 +36,7 @@ public class MerchantCache {
    public Merchant set(String name, Merchant merchant, Long id)
    {
        MerchantCache.getInstance().merchantMap.put(name, merchant);
-       MerchantCache.getInstance().merchantIndex.put(id,name);
        return merchant;
-   }
-
-   public Merchant getById(Long id)
-   {
-       String name = MerchantCache.getInstance().merchantIndex.get(id);
-       return MerchantCache.getInstance().merchantMap.get(name);
    }
 
    public AbstractMap<String, Merchant> getAll()
