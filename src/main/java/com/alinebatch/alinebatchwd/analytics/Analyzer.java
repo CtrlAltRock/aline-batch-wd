@@ -1,7 +1,9 @@
 package com.alinebatch.alinebatchwd.analytics;
 
 
+import com.alinebatch.alinebatchwd.caches.UserCache;
 import com.alinebatch.alinebatchwd.models.TransactionDTO;
+import com.alinebatch.alinebatchwd.models.User;
 import com.alinebatch.alinebatchwd.models.UserDTO;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
@@ -41,6 +43,8 @@ public class Analyzer {
     private HashMap<String, Integer> zipMap = new HashMap<>();
 
     private List<String> topZips = new ArrayList<>();
+
+    private ArrayList<UserDTO> withDeposits = new ArrayList<>();
 
     //transaction analysis
     private HashMap<String, Boolean> typeMap = new HashMap<>();
@@ -99,6 +103,7 @@ public class Analyzer {
         {
             userDTO.incrementIb();
         }
+
         return userDTO;
     }
 
@@ -112,6 +117,10 @@ public class Analyzer {
             {
                 getInstance().ibMore++;
             }
+        }
+        if (user.getDeposits().size() > 0)
+        {
+            getStaticInstance().withDeposits.add(user);
         }
     }
 
@@ -143,6 +152,14 @@ public class Analyzer {
             int cnt = a.noFraudMapState.get(state);
             cnt += 1;
             a.noFraudMapState.put(state,cnt);
+        }
+    }
+    public void isDeposit(TransactionDTO transaction)
+    {
+        if (transaction.getAmount().contains("-"))
+        {
+            UserDTO user = UserCache.getInstance().get(transaction.getUser());
+            user.getDeposits().add(transaction);
         }
     }
     //count no fraud/fraud by year

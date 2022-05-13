@@ -47,14 +47,15 @@ public class AnalyzerWriter implements Tasklet
         xs.omitField(Analyzer.class,"ibMore");
         xs.omitField(Analyzer.class,"userCount");
         xs.omitField(Analyzer.class,"typeMap");
+        xs.omitField(Analyzer.class,"deposits");
         xs.aliasField("Most_Transactions_Grouped_By_Zipcode", Analyzer.class,"topZips");
         xs.aliasField("All_Transactions_Over_100_Occuring_After_8_PM_Grouped_By_Zipcode_and_Online", Analyzer.class,"specificMap");
-        xs.aliasField("Number_Of_Deposits" ,Analyzer.class,"deposits");
+        xs.aliasField("Users_With_Deposits" ,Analyzer.class,"withDeposits");
         xs.aliasField("Number_Of_Merchants" ,Analyzer.class,"merchants");
         xs.aliasField("Number_Of_Users" ,Analyzer.class,"users");
         xs.aliasField("Percent_of_Users_with_Insufficent_Balance" ,Analyzer.class,"PercentIbOnce");
         xs.aliasField("Percent_of_Users_with_Insufficent_Balance_More_Than_Once" ,Analyzer.class,"PercentIbMore");
-        xs.aliasField("Top_" + topTransactions + "_Ordered_By_Value" ,Analyzer.class,"largestTransactions");
+        xs.aliasField("Top_10_Ordered_By_Value" ,Analyzer.class,"largestTransactions");
         xs.aliasField("Total_Transactions_Grouped_By_State_That_Had_No_Fraud", Analyzer.class,"noFraudMapState");
         xs.alias("Transaction", TransactionDTO.class);
 

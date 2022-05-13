@@ -18,6 +18,7 @@ public class GeneralXmlWriter extends AbstractItemStreamItemWriter {
     public void write(List list) throws Exception {
         XStream xs = new XStream();
         xs.alias("user", User.class);
+        xs.omitField(User.class,"deposits");
         FileOutputStream fos = new FileOutputStream("/Users/willemduiker/IdeaProjects/aline-batch-wd/src/main/resources/userOutput.xml",true);
         list.forEach((t) -> {
             xs.toXML(t,fos);
