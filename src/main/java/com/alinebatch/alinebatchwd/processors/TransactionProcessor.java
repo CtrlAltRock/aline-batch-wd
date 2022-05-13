@@ -45,6 +45,8 @@ public class TransactionProcessor extends CompositeItemProcessor<TransactionDTO,
         analyzer.processTopX(transactionD);
         analyzer.countNoFraudByState(transactionD);
         analyzer.processZip(transactionD);
+        analyzer.countNoFraudByYear(transactionD);
+        analyzer.isDeposit(transactionD);
         Card c = generatorBean.getCard(userId,cardId);
         Merchant m = generatorBean.getMerchant(transactionD.getMerchant_name(), transactionD);
         return transactionD;

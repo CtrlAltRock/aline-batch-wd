@@ -167,7 +167,7 @@ public class BatchConfig {
     public Step CardCacheStep()
     {
         return stepBuilderFactory.get("cardCacheStep")
-                .<UserDTO, HashMap<Long, Card>>chunk(10000)
+                .<UserDTO, HashMap<Long, Card>>chunk(1000)
                 .reader(new UserCacheReader<>(UserCache.getInstance().getAll()))
                 .processor(new CardCacheProcessor())
                 .writer(new CardItemWriter())
@@ -180,7 +180,7 @@ public class BatchConfig {
     {
 
         return stepBuilderFactory.get("stateCacheStep")
-                .<State, Object>chunk(10000)
+                .<State, Object>chunk(1000)
                 .reader(new StateCacheReader<State>(StateCache.getInstance().getAll().values().iterator()))
                 .processor(new StateCacheProcessor())
                 .writer(new StateItemWriter())
@@ -192,7 +192,7 @@ public class BatchConfig {
     public Step UserCacheStep()
     {
         return stepBuilderFactory.get("userCacheStep")
-                .<UserDTO, Object>chunk(10000)
+                .<UserDTO, Object>chunk(1000)
                 .reader(new UserCacheReader<>(UserCache.getInstance().getAll()))
                 .processor(new UserAggregateProcessor())
                 .writer(new GeneralXmlWriter())

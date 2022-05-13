@@ -29,6 +29,8 @@ public class UserDTO {
 
     private ArrayList<CardDTO> cards;
 
+    private ArrayList<TransactionDTO> deposits = new ArrayList<>();
+
     private int ibCount;
 
     public void incrementIb()
