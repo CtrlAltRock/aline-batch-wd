@@ -39,6 +39,11 @@ public class MerchantCache {
        return merchant;
    }
 
+   public int getTotal()
+   {
+        return MerchantCache.getInstance().merchantMap.size();
+   }
+
    public AbstractMap<String, Merchant> getAll()
    {
        return MerchantCache.getInstance().merchantMap;

@@ -35,6 +35,10 @@ public class UserCache {
         return UserCache.getInstance().cacheMap.get(id);
     }
 
+    public Integer count()
+    {
+        return UserCache.getInstance().cacheMap.size();
+    }
     public ArrayList<Object> collect()
     {
         return new ArrayList<Object>(Arrays.asList(UserCache.getInstance().cacheMap.values().toArray()));

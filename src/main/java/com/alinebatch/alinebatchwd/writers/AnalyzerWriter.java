@@ -1,7 +1,11 @@
 package com.alinebatch.alinebatchwd.writers;
 
+import com.alinebatch.alinebatchwd.analytics.AnalysisContainer;
+import com.alinebatch.alinebatchwd.analytics.AnalysisWrite;
 import com.alinebatch.alinebatchwd.analytics.Analyzer;
 import com.alinebatch.alinebatchwd.analytics.Querier;
+import com.alinebatch.alinebatchwd.analytics.postProcess.CountOfMerchants;
+import com.alinebatch.alinebatchwd.caches.MerchantCache;
 import com.alinebatch.alinebatchwd.caches.UserCache;
 import com.alinebatch.alinebatchwd.models.TransactionDTO;
 import com.alinebatch.alinebatchwd.models.User;
@@ -25,6 +29,8 @@ public class AnalyzerWriter implements Tasklet
 
     Analyzer analyzer = Analyzer.getStaticInstance();
 
+    MerchantCache merchantCache = new MerchantCache();
+
     UserCache userCache = new UserCache();
 
     @Value("${TopTransactions}")
@@ -32,7 +38,11 @@ public class AnalyzerWriter implements Tasklet
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        //post process analyses
+        CountOfMerchants countOfMerchants = new CountOfMerchants(merchantCache.getTotal());
+
         analyzer.calculatePercentages();
+
         XStream xs = new XStream();
         xs.alias("Analyzer",Analyzer.class);
         xs.omitField(Analyzer.class, "errorMap");
@@ -58,6 +68,10 @@ public class AnalyzerWriter implements Tasklet
         xs.aliasField("Top_10_Ordered_By_Value" ,Analyzer.class,"largestTransactions");
         xs.aliasField("Total_Transactions_Grouped_By_State_That_Had_No_Fraud", Analyzer.class,"noFraudMapState");
         xs.alias("Transaction", TransactionDTO.class);
+        //handle all cumulative calculations
+
+        AnalysisContainer.postProcess();
+        AnalysisContainer.write();
 
         FileOutputStream fos = new FileOutputStream("/Users/willemduiker/IdeaProjects/aline-batch-wd/src/main/resources/analysis.xml",true);
         xs.toXML(analyzer, fos);
