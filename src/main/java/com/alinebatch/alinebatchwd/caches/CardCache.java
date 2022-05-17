@@ -1,6 +1,7 @@
 package com.alinebatch.alinebatchwd.caches;
 
 import com.alinebatch.alinebatchwd.models.Card;
+import com.alinebatch.alinebatchwd.models.CardDTO;
 import org.aspectj.lang.reflect.CatchClauseSignature;
 
 import java.util.AbstractMap;
@@ -23,16 +24,16 @@ public class CardCache {
         return instance;
     }
 
-    private LinkedHashMap<Long, HashMap<Long, Card>> cacheMap = new LinkedHashMap<>();
+    private HashMap<Long, HashMap<Long, CardDTO>> cacheMap = new HashMap<>();
 
     private HashSet<String> seenCache = new HashSet<>();
 
-    public HashMap<Long, Card> getAll(Long userId)
+    public HashMap<Long, CardDTO> getAll(Long userId)
     {
         return CardCache.getInstance().cacheMap.get(userId);
     }
 
-    public Card get(Long userId, Long cardId) {
+    public CardDTO get(Long userId, Long cardId) {
         if (CardCache.getInstance().cacheMap.get(userId) == null)
         {
             synchronized (CardCache.class)
@@ -47,7 +48,7 @@ public class CardCache {
     }
 
 
-    public Card set(Long userId, Long cardId, Card card)
+    public CardDTO set(Long userId, Long cardId, CardDTO card)
     {
         if (CardCache.getInstance().cacheMap.get(userId) == null)
         {
@@ -63,7 +64,7 @@ public class CardCache {
         return card;
     }
 
-    public AbstractMap<Long, HashMap<Long,Card>> getAll() {
+    public AbstractMap<Long, HashMap<Long,CardDTO>> getAll() {
         return CardCache.getInstance().cacheMap;
     }
     public HashSet<String> getSeen() {return CardCache.getInstance().seenCache;}

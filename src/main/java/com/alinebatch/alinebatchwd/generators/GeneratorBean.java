@@ -24,13 +24,17 @@ import java.util.HashMap;
 @Slf4j
 public class GeneratorBean {
 
-    private static String baseUrl = "http://localhost:8085";
-
     private static UserCache userCache = new UserCache();
 
     private static CardCache cardCache = new CardCache();
 
     private static MerchantCache merchantCache = new MerchantCache();
+
+    UserGenerator userGenerator = new UserGenerator();
+
+    CardGenerator cardGenerator = new CardGenerator();
+
+    MerchantGenerator merchantGenerator = new MerchantGenerator();
 
     private static int userCount = 0;
     private static int cardCount = 0;
@@ -39,47 +43,26 @@ public class GeneratorBean {
 
     public UserDTO getUser(long id) throws Exception {
         if (userCache.get(id) == null) {
-            synchronized (UserCache.class) {
+            synchronized (userCache) {
                 if (userCache.get(id) == null) {
-                    try {
-                        URL url = new URL(baseUrl + "/users/generate/user/" + id);
-                        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                        con.setRequestMethod("GET");
-                        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                        String input;
-                        input = in.readLine();
-                        UserDTO user = new ObjectMapper().readValue(input, UserDTO.class);
-                        user.setIbCount(0);
+
+                        UserDTO user = userGenerator.generateUser(id);
                         userCache.set(id, user);
                         log.info(id + "");
                         return user;
-                    } catch (Exception e) {
-                        log.info(e.getMessage());
-                    }
                 }
             }
         }
         return userCache.get(id);
     }
 
-    public Card getCard(long userId, long cardId) throws Exception {
+    public CardDTO getCard(long userId, long cardId) throws Exception {
         if (cardCache.get(userId, cardId) == null) {
-            synchronized (CardCache.class) {
+            synchronized (cardCache.getAll()) {
                 if (cardCache.get(userId, cardId) == null) {
-                    try {
-                        URL url = new URL(baseUrl + "/users/generate/card/" + userId + "/" + cardId);
-                        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                        con.setRequestMethod("GET");
-                        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                        String input;
-                        input = in.readLine();
-                        Card card = new ObjectMapper().readValue(input, Card.class);
-                        card.setUserId(userId);
+                        CardDTO card = cardGenerator.generateCard(userId, cardId);
                         cardCache.set(userId, cardId, card);
                         return card;
-                    } catch (Exception e) {
-                        log.info(e.getMessage());
-                    }
                 }
             }
         }
@@ -90,19 +73,12 @@ public class GeneratorBean {
     {
         if (merchantCache.get(name) == null)
         {
-            synchronized (MerchantCache.class) {
+            synchronized (merchantCache.getAll()) {
                 if (merchantCache.get(name) == null)
                 {
-                    URL url = new URL(baseUrl + "/merchants/generate/merchant/" + name);
-                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                    con.setRequestMethod("GET");
-                    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                    String input;
-                    input = in.readLine();
-                    Merchant m = new ObjectMapper().readValue(input, Merchant.class);
-                    m.setCity(transaction.getMerchant_city());
-                    m.setZip(transaction.getMerchant_zip());
-                    m.setState(transaction.getMerchant_state());
+                    Merchant m = merchantGenerator.generateMerchant((long)merchantCache.getTotal(),transaction.getMerchant_state()
+                    ,transaction.getMerchant_city()
+                    ,transaction.getMerchant_zip());
                     merchantCache.set(name, m, m.getId());
                     analyzer.addMerchant();
                 }

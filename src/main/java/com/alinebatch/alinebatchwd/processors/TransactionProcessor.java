@@ -51,14 +51,9 @@ public class TransactionProcessor extends CompositeItemProcessor<TransactionDTO,
     //Creates Caches for all objects
     @Override
     public TransactionDTO process(TransactionDTO transactionD) throws Exception {
-        if (transactionD == null)
-        {
-            log.info("This does return null at some point");
-        }
         if (stateCache.getInstance().get(transactionD.getMerchant_state()) != null)
         {
             stateCache.getInstance().putZip(transactionD.getMerchant_state(),transactionD.getMerchant_zip());
-
         }
         long userId = transactionD.getUser();
         long cardId = transactionD.getCard();
@@ -69,7 +64,7 @@ public class TransactionProcessor extends CompositeItemProcessor<TransactionDTO,
         percentageOfFraudByYear.process(transactionD);
         countInsufficientBalance.process(transactionD);
         mostTransactionsByZipCode.process(transactionD);
-        Card c = generatorBean.getCard(userId,cardId);
+        CardDTO c = generatorBean.getCard(userId,cardId);
         Merchant m = generatorBean.getMerchant(transactionD.getMerchant_name(), transactionD);
         return transactionD;
     }

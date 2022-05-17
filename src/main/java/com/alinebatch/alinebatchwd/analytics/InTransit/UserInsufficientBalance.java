@@ -52,6 +52,6 @@ public class UserInsufficientBalance extends BasicWriter<BigDecimal> implements 
 
     @Override
     public void postProcess() {
-        this.basicStat = new BigDecimal(hasInsufficent/((double)UserCache.getInstance().count())).round(new MathContext(4));
+        this.basicStat = new BigDecimal((hasInsufficent/((double)UserCache.getInstance().count()))*100).round(new MathContext(4));
     }
 }

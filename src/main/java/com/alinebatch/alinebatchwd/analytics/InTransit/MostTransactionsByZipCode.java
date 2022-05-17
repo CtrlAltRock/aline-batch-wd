@@ -6,6 +6,7 @@ import com.alinebatch.alinebatchwd.models.TransactionDTO;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.validation.constraints.Null;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,7 +69,19 @@ public class MostTransactionsByZipCode extends SortedWriter<String, Integer> imp
                     }
                 }
             }
-            unsortedTally.put(zip, unsortedTally.get(zip) + 1);
+            synchronized (unsortedTally)
+            {
+                try
+                {
+                    unsortedTally.put(zip, unsortedTally.get(zip) + 1);
+                } catch (NullPointerException e)
+                {
+                    log.info(zip);
+                    log.info(e.getMessage());
+                }
+
+            }
+
         }
     }
 
