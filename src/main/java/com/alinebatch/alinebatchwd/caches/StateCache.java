@@ -19,7 +19,6 @@ public class StateCache {
         {
             synchronized (StateCache.class)
             {
-                log.info("Locked in state Cache");
                 if (instance == null)
                 {
                     instance = new StateCache();

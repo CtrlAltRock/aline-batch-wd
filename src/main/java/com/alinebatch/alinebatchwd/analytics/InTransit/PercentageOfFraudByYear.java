@@ -73,9 +73,17 @@ public class PercentageOfFraudByYear extends AnalysisWrite<Integer, String> impl
         }
         if (fraud)
         {
-            fraudMap.put(year,fraudMap.get(year) + 1);
+            synchronized (fraudMap)
+            {
+                fraudMap.put(year,fraudMap.get(year) + 1);
+            }
+
         } else {
-            noFraudMap.put(year,noFraudMap.get(year) + 1);
+            synchronized (noFraudMap)
+            {
+                noFraudMap.put(year,noFraudMap.get(year) + 1);
+            }
+
         }
     }
 

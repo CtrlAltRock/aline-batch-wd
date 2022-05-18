@@ -2,6 +2,7 @@ package com.alinebatch.alinebatchwd.caches;
 
 import com.alinebatch.alinebatchwd.models.Card;
 import com.alinebatch.alinebatchwd.models.CardDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.reflect.CatchClauseSignature;
 
 import java.util.AbstractMap;
@@ -10,6 +11,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 public class CardCache {
 
     public static CardCache instance = null;

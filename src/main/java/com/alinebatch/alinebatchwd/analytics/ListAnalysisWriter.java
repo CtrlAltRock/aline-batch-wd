@@ -6,30 +6,29 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.util.HashMap;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+
 
 @Slf4j
-public abstract class AnalysisWrite<T,U> {
+public abstract class ListAnalysisWriter<T> {
 
-    public ConcurrentHashMap<T,U> analysisMap = new ConcurrentHashMap<>();
+    public ArrayList<T> analysisList = new ArrayList<>();
 
-    public AnalysisWrite()
+    public ListAnalysisWriter()
     {
         Class loggingClass = this.getClass();
         log.info("In Constructor for " + loggingClass.getName());
-        AnalysisContainer.add(this);
+        AnalysisContainer.addList(this);
     }
 
-    public abstract Class getKeyClass();
     public abstract Class getValueClass();
 
-    public abstract String keyName();
-    public abstract String valueName();
     public abstract String rootTag();
+    public abstract String valueName();
     public abstract String filePath();
-
 
     protected void write() throws Exception
     {
@@ -40,9 +39,8 @@ public abstract class AnalysisWrite<T,U> {
         fw.close();
         XStream xs = new XStream();
         FileOutputStream fos = new FileOutputStream(output, true);
-        xs.alias(keyName(), getKeyClass());
         xs.alias(valueName(), getValueClass());
-        xs.alias(rootTag(), Map.class);
-        xs.toXML(analysisMap, fos);
+        xs.alias(rootTag(), List.class);
+        xs.toXML(analysisList, fos);
     }
 }

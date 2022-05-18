@@ -20,7 +20,13 @@ public class MostTransactionsByZipCode extends SortedWriter<String, Integer> imp
     public MostTransactionsByZipCode(int count)
     {
         super(count);
+        for (int i = 100; i < 100000; i ++)
+        {
+            unsortedTally.put(i+".0",0);
+        }
     }
+
+
 
 
     @Override
@@ -56,13 +62,14 @@ public class MostTransactionsByZipCode extends SortedWriter<String, Integer> imp
     @Override
     public void process(TransactionDTO input) {
 
-        if (input.getMerchant_zip() != "")
+        if (!input.getMerchant_zip().equals(""))
         {
             String zip = input.getMerchant_zip();
             if (unsortedTally.get(zip) == null)
             {
                 synchronized (unsortedTally)
                 {
+                    log.info("Creating new zip");
                     if (unsortedTally.get(zip) == null)
                     {
                         unsortedTally.put(zip,0);

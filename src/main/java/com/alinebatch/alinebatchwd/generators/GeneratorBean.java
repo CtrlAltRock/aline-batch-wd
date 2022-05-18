@@ -39,9 +39,28 @@ public class GeneratorBean {
     private static int userCount = 0;
     private static int cardCount = 0;
 
-    private Analyzer analyzer = new Analyzer();
-
     public UserDTO getUser(long id) throws Exception {
+        //check if we need to generate more users
+        if (id % 1000 == 0 && id >= userCache.count()) {
+            synchronized (userCache)
+            {
+                if (id % 1000 == 0 && id >= userCache.count())
+                {
+                    log.info("Generating Block of Users");
+                    for (long i = id; i < id + 1000; i ++)
+                    {
+                        UserDTO user = userGenerator.generateUser(i);
+                        userCache.set(i,user);
+                        for (long j = 0; j < 10; j ++)
+                        {
+                            CardDTO card = cardGenerator.generateCard(i,j);
+                            cardCache.set(i,j,card);
+                        }
+                    }
+                }
+            }
+        }
+        /*
         if (userCache.get(id) == null) {
             synchronized (userCache) {
                 if (userCache.get(id) == null) {
@@ -53,13 +72,16 @@ public class GeneratorBean {
                 }
             }
         }
+        */
+        userCache.checkLatest(id);
         return userCache.get(id);
     }
 
     public CardDTO getCard(long userId, long cardId) throws Exception {
         if (cardCache.get(userId, cardId) == null) {
-            synchronized (cardCache.getAll()) {
+            synchronized (cardCache) {
                 if (cardCache.get(userId, cardId) == null) {
+                        log.info("Generating new card");
                         CardDTO card = cardGenerator.generateCard(userId, cardId);
                         cardCache.set(userId, cardId, card);
                         return card;
@@ -73,14 +95,13 @@ public class GeneratorBean {
     {
         if (merchantCache.get(name) == null)
         {
-            synchronized (merchantCache.getAll()) {
+            synchronized (merchantCache) {
                 if (merchantCache.get(name) == null)
                 {
                     Merchant m = merchantGenerator.generateMerchant((long)merchantCache.getTotal(),transaction.getMerchant_state()
                     ,transaction.getMerchant_city()
                     ,transaction.getMerchant_zip());
                     merchantCache.set(name, m, m.getId());
-                    analyzer.addMerchant();
                 }
             }
         }
