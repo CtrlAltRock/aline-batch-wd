@@ -10,6 +10,7 @@ import com.alinebatch.alinebatchwd.caches.StateCache;
 import com.alinebatch.alinebatchwd.generators.GeneratorBean;
 import com.alinebatch.alinebatchwd.models.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.support.CompositeItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,31 +47,36 @@ public class TransactionProcessor extends CompositeItemProcessor<TransactionDTO,
 
     MostTransactionsByZipCode mostTransactionsByZipCode = new MostTransactionsByZipCode(5);
 
+    TransactionTypes transactionTypes = new TransactionTypes();
 
+    TopTenTransactions topTenTransactions = new TopTenTransactions();
 
+    TopFiveMerchantsNoErrorsNoIb topFiveMerchantsNoErrorsNoIb = new TopFiveMerchantsNoErrorsNoIb(5);
+
+    DepositsByUser depositsByUser = new DepositsByUser();
     //Creates Caches for all objects
     @Override
     public TransactionDTO process(TransactionDTO transactionD) throws Exception {
-        if (transactionD == null)
-        {
-            log.info("This does return null at some point");
-        }
         if (stateCache.getInstance().get(transactionD.getMerchant_state()) != null)
         {
             stateCache.getInstance().putZip(transactionD.getMerchant_state(),transactionD.getMerchant_zip());
-
         }
         long userId = transactionD.getUser();
         long cardId = transactionD.getCard();
         UserDTO u = generatorBean.getUser(userId);
+        CardDTO c = generatorBean.getCard(userId,cardId);
+        Merchant m = generatorBean.getMerchant(transactionD.getMerchant_name(), transactionD);
         //do analysis
         countNoFraudByState.process(transactionD);
         processSpecificTransaction.process(transactionD);
         percentageOfFraudByYear.process(transactionD);
         countInsufficientBalance.process(transactionD);
         mostTransactionsByZipCode.process(transactionD);
-        Card c = generatorBean.getCard(userId,cardId);
-        Merchant m = generatorBean.getMerchant(transactionD.getMerchant_name(), transactionD);
+        transactionTypes.process(transactionD);
+        topTenTransactions.process(transactionD);
+        depositsByUser.process(transactionD);
+        topFiveMerchantsNoErrorsNoIb.process(transactionD);
+
         return transactionD;
     }
 }

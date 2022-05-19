@@ -20,6 +20,7 @@ public class UserAggregateProcessor implements ItemProcessor<UserDTO, UserDTO> {
     @Override
     public UserDTO process(UserDTO item) throws Exception {
         userInsufficientBalance.process(item);
+        userInsufficientBalanceMore.process(item);
         return item;
     }
 }

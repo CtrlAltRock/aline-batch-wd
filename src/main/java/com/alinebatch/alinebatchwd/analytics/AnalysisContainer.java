@@ -1,9 +1,12 @@
 package com.alinebatch.alinebatchwd.analytics;
 
+import com.alinebatch.alinebatchwd.TestInjectionLambda;
 import com.alinebatch.alinebatchwd.analytics.postProcess.PostProcessAnalysis;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 public class AnalysisContainer {
@@ -13,6 +16,8 @@ public class AnalysisContainer {
     private ArrayList<BasicWriter<?>> listOfBasics = new ArrayList<>();
 
     private ArrayList<PostProcessAnalysis> listOfPostProcessors = new ArrayList<>();
+
+    private ArrayList<ListAnalysisWriter<?>> listOfListAnalyzers = new ArrayList<>();
 
     private static AnalysisContainer instance;
 
@@ -36,6 +41,13 @@ public class AnalysisContainer {
         log.info("Adding to analysis write queue: " + analysisWrite.getClass());
 
         getInstance().listOfAnalyzers.add(analysisWrite);
+    }
+
+    public static void addList(ListAnalysisWriter<?> lister)
+    {
+        log.info("Adding to analysis write queue: " + lister.getClass());
+
+        getInstance().listOfListAnalyzers.add(lister);
     }
 
     public static void addBasic(BasicWriter<?> basicWriter)
@@ -69,6 +81,19 @@ public class AnalysisContainer {
             }
 
         });
+
+        getInstance().listOfListAnalyzers.forEach((a) ->
+        {
+            try
+            {
+                a.write();
+            } catch (Exception e)
+            {
+                log.info(e.getMessage());
+            }
+
+        });
+
         getInstance().listOfBasics.forEach((a) ->
         {
             try
@@ -80,5 +105,47 @@ public class AnalysisContainer {
             }
 
         });
+    }
+
+    public static AnalysisWrite<?,?> grabProcessor(Class toGrab)
+    {
+        AtomicReference<AnalysisWrite<?, ?>> returner = new AtomicReference<>();
+
+        getInstance().listOfAnalyzers.forEach((k) ->{
+            if (k.getClass().equals(toGrab))
+            {
+                returner.set(k);
+            }
+        });
+        return returner.get();
+    }
+
+    public static BasicWriter<?> grabBasic(Class toGrab)
+    {
+        AtomicReference<BasicWriter<?>> returner = new AtomicReference<>();
+        getInstance().listOfBasics.forEach((k) ->
+        {
+            if (k.getClass().equals(toGrab))
+            {
+                returner.set(k);
+            }
+        });
+        return returner.get();
+    }
+
+    public static boolean injectTest(TestInjectionLambda method, Class toTest)
+    {
+        AtomicBoolean allGood = new AtomicBoolean(true);
+        getInstance().listOfAnalyzers.forEach((k) ->
+        {
+            if (k.getClass().equals(toTest))
+            {
+                k.analysisMap.entrySet().forEach((e) ->
+                {
+                    if (!method.injectedLogic(e)) allGood.set(false);
+                });
+            }
+        });
+        return allGood.get();
     }
 }

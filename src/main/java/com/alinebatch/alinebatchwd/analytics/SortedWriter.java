@@ -18,7 +18,7 @@ public abstract class SortedWriter<T,U> extends AnalysisWrite<T,U>{
 
     public SortedWriter(int count)
     {
-
+        this.count = count;
     }
 
     public abstract ArrayList<String> sort(HashMap<T,U> toSort);

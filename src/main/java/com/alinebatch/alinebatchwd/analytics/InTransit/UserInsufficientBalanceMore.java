@@ -44,14 +44,14 @@ public class UserInsufficientBalanceMore extends BasicWriter<BigDecimal> impleme
 
     @Override
     public void process(UserDTO input) {
-        if (input.getIbCount() > 1)
+        if (input.getIbCount() > 1.0)
         {
-            hasInsufficent += 1;
+            hasInsufficent += 1.0;
         }
     }
 
     @Override
     public void postProcess() {
-        this.basicStat = new BigDecimal(hasInsufficent/((double)UserCache.getInstance().count())).round(new MathContext(4));
+        this.basicStat = new BigDecimal((hasInsufficent/((double)UserCache.getInstance().latest)) * 100).round(new MathContext(4));
     }
 }

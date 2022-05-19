@@ -1,6 +1,7 @@
 package com.alinebatch.alinebatchwd.writers;
 
 import com.alinebatch.alinebatchwd.models.Card;
+import com.alinebatch.alinebatchwd.models.CardDTO;
 import com.alinebatch.alinebatchwd.models.User;
 import com.thoughtworks.xstream.XStream;
 import org.hibernate.cfg.Environment;
@@ -23,10 +24,10 @@ public class CardItemWriter extends AbstractItemStreamItemWriter {
     @Override
     public void write(List list) throws Exception {
         XStream xs = new XStream();
-        xs.alias("card", Card.class);
+        xs.alias("card", CardDTO.class);
         FileOutputStream fos = new FileOutputStream("/Users/willemduiker/IdeaProjects/aline-batch-wd/src/main/resources/cardOutput.xml",true);
         list.forEach((t) -> {
-            HashMap<Long, Card> hm = (HashMap<Long, Card>)t;
+            HashMap<Long, CardDTO> hm = (HashMap<Long, CardDTO>)t;
             hm.forEach((k, v) -> {
                 xs.toXML(v,fos);
             });

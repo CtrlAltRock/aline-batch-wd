@@ -55,8 +55,8 @@ public class BatchConfig {
     TaskExecutor multiThreadedExecutor()
     {
         ThreadPoolTaskExecutor threadTask = new ThreadPoolTaskExecutor();
-        threadTask.setMaxPoolSize(6);
-        threadTask.setCorePoolSize(6);
+        threadTask.setMaxPoolSize(16);
+        threadTask.setCorePoolSize(8);
         threadTask.afterPropertiesSet();
         return threadTask;
     }
@@ -167,7 +167,7 @@ public class BatchConfig {
     public Step CardCacheStep()
     {
         return stepBuilderFactory.get("cardCacheStep")
-                .<UserDTO, HashMap<Long, Card>>chunk(1000)
+                .<UserDTO, HashMap<Long, CardDTO>>chunk(1000)
                 .reader(new UserCacheReader<>(UserCache.getInstance().getAll()))
                 .processor(new CardCacheProcessor())
                 .writer(new CardItemWriter())

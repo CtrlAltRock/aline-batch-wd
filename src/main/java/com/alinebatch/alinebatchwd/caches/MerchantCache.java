@@ -21,32 +21,49 @@ public class MerchantCache {
    {
                if (instance == null)
                {
-                   instance = new MerchantCache();
+                   synchronized (MerchantCache.class)
+                   {
+                       if (instance == null)
+                       {
+                           instance = new MerchantCache();
+                       }
+                   }
+
                }
        return instance;
    }
 
    public HashMap<String, Merchant> merchantMap = new HashMap<>();
 
-   public Merchant get(String name)
+   public static Merchant get(String name)
    {
        return MerchantCache.getInstance().merchantMap.get(name);
    }
 
-   public Merchant set(String name, Merchant merchant, Long id)
+   public static void toggleIb(String name)
    {
-       MerchantCache.getInstance().merchantMap.put(name, merchant);
+       getInstance().merchantMap.get(name).setHadIb(true);
+   }
+
+    public static void toggleErrors(String name)
+    {
+        getInstance().merchantMap.get(name).setHadErrors(true);
+    }
+
+   public static Merchant set(String name, Merchant merchant, Long id)
+   {
+       getInstance().merchantMap.put(name, merchant);
        return merchant;
    }
 
-   public int getTotal()
+   public static int getTotal()
    {
-        return MerchantCache.getInstance().merchantMap.size();
+        return getInstance().merchantMap.size();
    }
 
-   public AbstractMap<String, Merchant> getAll()
+   public static AbstractMap<String, Merchant> getAll()
    {
-       return MerchantCache.getInstance().merchantMap;
+       return getInstance().merchantMap;
    }
 
 }

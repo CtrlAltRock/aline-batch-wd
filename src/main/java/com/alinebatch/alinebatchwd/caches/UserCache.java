@@ -2,13 +2,26 @@ package com.alinebatch.alinebatchwd.caches;
 
 import com.alinebatch.alinebatchwd.models.User;
 import com.alinebatch.alinebatchwd.models.UserDTO;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 public class UserCache {
 
     public static UserCache instance = null;
+
+    public long latest = 0L;
+
+    public void checkLatest(Long id)
+    {
+        if (id+1 > getInstance().latest)
+        {
+            getInstance().latest = id +1;
+            log.info("Now serving user: " + (id+1));
+        }
+    }
 
     public static UserCache getInstance()
     {

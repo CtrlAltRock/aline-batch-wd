@@ -26,4 +26,8 @@ public class Merchant {
 
     private String zip;
 
+    private Boolean hadIb = false;
+
+    private Boolean hadErrors = false;
+
 }
