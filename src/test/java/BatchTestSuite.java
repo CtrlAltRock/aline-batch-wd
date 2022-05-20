@@ -75,10 +75,76 @@ public class BatchTestSuite {
     @Test
     public void TransactionsAreLinearlyScaled()
     {
-        //need to reimplement
+        ArrayList<Integer> against = new ArrayList<>();
+        against.add(21635);
+        against.add(14267);
+        against.add(11860);
+        against.add(10874);
+        against.add(5130);
+        try {
+            File file = new File("/Users/willemduiker/IdeaProjects/aline-batch-wd/src/main/resources/analysis/TopCityByTransaction.xml");
+            Scanner scanner = new Scanner(file).useDelimiter("\n");
+            int count = 0;
+            while (scanner.hasNext()) {
+                String check = scanner.next();
+                if (check.contains("Count")) {
 
+                    check = check.replace("Count", "")
+                            .replace("<", "")
+                            .replace(">", "")
+                            .replace("/", "")
+                            .replace(" ", "")
+                            .replace("$", "");
+                    log.info(check);
+                    Integer amount = Integer.parseInt(check);
+                    assertEquals(amount, against.get(count));
+                    count++;
+                }
+            }
+        } catch (Exception e)
+        {
+            log.info(e.getMessage());
+        }
+    }
 
+    @Test
+    public void Top5CitiesAreConsistent()
+    {
+        ArrayList<Double> against = new ArrayList<>();
+        against.add(6820.20);
+        against.add(5591.73);
+        against.add(3750.60);
+        against.add(3613.22);
+        against.add(3516.73);
+        against.add(3424.51);
+        against.add(3423.41);
+        against.add(3380.98);
+        against.add(3362.97);
+        against.add(3215.36);
+        try {
+            File file = new File("/Users/willemduiker/IdeaProjects/aline-batch-wd/src/main/resources/analysis/Top_Ten_Transactions.xml");
+            Scanner scanner = new Scanner(file).useDelimiter("\n");
+            int count = 0;
+            while (scanner.hasNext()) {
+                String check = scanner.next();
+                if (check.contains("amount")) {
 
+                    check = check.replace("amount", "")
+                            .replace("<", "")
+                            .replace(">", "")
+                            .replace("/", "")
+                            .replace(" ", "")
+                            .replace("$", "");
+                    log.info(check);
+                    Double amount = Double.parseDouble(check);
+                    assertEquals(amount, against.get(count));
+                    count++;
+                }
+            }
+        } catch (Exception e)
+        {
+            log.info(e.getMessage());
+        }
 
     }
 
