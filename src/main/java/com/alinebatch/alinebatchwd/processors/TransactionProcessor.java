@@ -53,6 +53,8 @@ public class TransactionProcessor extends CompositeItemProcessor<TransactionDTO,
 
     TopFiveMerchantsNoErrorsNoIb topFiveMerchantsNoErrorsNoIb = new TopFiveMerchantsNoErrorsNoIb(5);
 
+    TopCityByTransaction topCityByTransaction = new TopCityByTransaction(5);
+
     DepositsByUser depositsByUser = new DepositsByUser();
     //Creates Caches for all objects
     @Override
@@ -76,6 +78,7 @@ public class TransactionProcessor extends CompositeItemProcessor<TransactionDTO,
         topTenTransactions.process(transactionD);
         depositsByUser.process(transactionD);
         topFiveMerchantsNoErrorsNoIb.process(transactionD);
+        topCityByTransaction.process(transactionD);
 
         return transactionD;
     }
