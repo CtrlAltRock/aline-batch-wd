@@ -1,6 +1,5 @@
 package com.alinebatch.alinebatchwd.processors;
 
-import com.alinebatch.alinebatchwd.analytics.Analyzer;
 import com.alinebatch.alinebatchwd.analytics.InTransit.UserInsufficientBalance;
 import com.alinebatch.alinebatchwd.analytics.InTransit.UserInsufficientBalanceMore;
 import com.alinebatch.alinebatchwd.models.UserDTO;
@@ -11,7 +10,6 @@ import java.math.BigDecimal;
 
 public class UserAggregateProcessor implements ItemProcessor<UserDTO, UserDTO> {
 
-    Analyzer analyzer = new Analyzer();
 
     //analyzers
     UserInsufficientBalance userInsufficientBalance = new UserInsufficientBalance(new BigDecimal(0));

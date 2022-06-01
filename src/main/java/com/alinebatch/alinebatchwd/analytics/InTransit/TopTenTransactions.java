@@ -40,6 +40,10 @@ public class TopTenTransactions extends ListAnalysisWriter<TransactionDTO> imple
             if (analysisList.size() == 10)
             {
                 double against = parseValue(analysisList.get(9));
+                if (to < against)
+                {
+                    break;
+                }
             }
             synchronized (analysisList)
             {

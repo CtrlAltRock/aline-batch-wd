@@ -2,7 +2,6 @@ package com.alinebatch.alinebatchwd.processors;
 
 
 import com.alinebatch.alinebatchwd.analytics.AnalysisContainer;
-import com.alinebatch.alinebatchwd.analytics.Analyzer;
 import com.alinebatch.alinebatchwd.analytics.InTransit.*;
 import com.alinebatch.alinebatchwd.analytics.InTransitAnalysis;
 import com.alinebatch.alinebatchwd.caches.MerchantCache;
@@ -31,15 +30,12 @@ public class TransactionProcessor extends CompositeItemProcessor<TransactionDTO,
 
     private AnalysisContainer analysisContainer = new AnalysisContainer();
 
-    Analyzer analyzer = new Analyzer();
 
     Long howMany = 0L;
 
     //processors
 
     CountNoFraudByState countNoFraudByState = new CountNoFraudByState();
-
-    ProcessSpecificTransaction processSpecificTransaction = new ProcessSpecificTransaction();
 
     PercentageOfFraudByYear percentageOfFraudByYear = new PercentageOfFraudByYear();
 
@@ -56,7 +52,13 @@ public class TransactionProcessor extends CompositeItemProcessor<TransactionDTO,
     TopCityByTransaction topCityByTransaction = new TopCityByTransaction(5);
 
     DepositsByUser depositsByUser = new DepositsByUser();
-    //Creates Caches for all objects
+
+    BottomFiveMonths bottomFiveMonths = new BottomFiveMonths(5);
+
+    TopCitiesByNumberOfOnlineMerchants topCitiesByNumberOfOnlineMerchants = new TopCitiesByNumberOfOnlineMerchants(10);
+
+    ProcessSpecificTransaction processSpecificTransaction = new ProcessSpecificTransaction();
+
     @Override
     public TransactionDTO process(TransactionDTO transactionD) throws Exception {
         if (stateCache.getInstance().get(transactionD.getMerchant_state()) != null)
@@ -65,12 +67,11 @@ public class TransactionProcessor extends CompositeItemProcessor<TransactionDTO,
         }
         long userId = transactionD.getUser();
         long cardId = transactionD.getCard();
-        UserDTO u = generatorBean.getUser(userId);
-        CardDTO c = generatorBean.getCard(userId,cardId);
-        Merchant m = generatorBean.getMerchant(transactionD.getMerchant_name(), transactionD);
+        generatorBean.getUser(userId);
+        generatorBean.getCard(userId,cardId);
+        generatorBean.getMerchant(transactionD.getMerchant_name(), transactionD);
         //do analysis
         countNoFraudByState.process(transactionD);
-        processSpecificTransaction.process(transactionD);
         percentageOfFraudByYear.process(transactionD);
         countInsufficientBalance.process(transactionD);
         mostTransactionsByZipCode.process(transactionD);
@@ -79,7 +80,9 @@ public class TransactionProcessor extends CompositeItemProcessor<TransactionDTO,
         depositsByUser.process(transactionD);
         topFiveMerchantsNoErrorsNoIb.process(transactionD);
         topCityByTransaction.process(transactionD);
-
+        bottomFiveMonths.process(transactionD);
+        topCitiesByNumberOfOnlineMerchants.process(transactionD);
+        //processSpecificTransaction.process(transactionD);
         return transactionD;
     }
 }

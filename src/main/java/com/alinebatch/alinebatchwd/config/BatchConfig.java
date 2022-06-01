@@ -55,8 +55,8 @@ public class BatchConfig {
     TaskExecutor multiThreadedExecutor()
     {
         ThreadPoolTaskExecutor threadTask = new ThreadPoolTaskExecutor();
-        threadTask.setMaxPoolSize(16);
-        threadTask.setCorePoolSize(8);
+        threadTask.setMaxPoolSize(12);
+        threadTask.setCorePoolSize(6);
         threadTask.afterPropertiesSet();
         return threadTask;
     }
@@ -108,7 +108,7 @@ public class BatchConfig {
     public Step multiThreadedStep()
     {
                 return stepBuilderFactory.get("multiThreadedStep")
-                        .<TransactionDTO,Object>chunk(10000)
+                        .<TransactionDTO,Object>chunk(1000)
                         .reader(CsvReader())
                         .processor(new TransactionProcessor())
                         .writer(new UserXmlItemWriter())
@@ -227,17 +227,6 @@ public class BatchConfig {
     }
 
     @Bean
-    public Step analysisWrite()
-    {
-        return stepBuilderFactory
-                .get("write_analysis")
-                .tasklet(new AnalyzerWriter())
-                .build();
-    }
-
-
-
-    @Bean
     public Step CloseStep()
     {
         return stepBuilderFactory
@@ -258,8 +247,6 @@ public class BatchConfig {
         return new BasicCloser();
     }
 
-    @Bean
-    public AnalyzerWriter doAnalysis() { return new AnalyzerWriter();}
 
     @Bean
     public Job buildJob()
@@ -269,7 +256,6 @@ public class BatchConfig {
                 .next(multiThreadedStep())
                 .next(aggregateFLow())
                 .next(analysisStep())
-                .next(analysisWrite())
                 .next(CloseStep())
                 .end()
                 .build();

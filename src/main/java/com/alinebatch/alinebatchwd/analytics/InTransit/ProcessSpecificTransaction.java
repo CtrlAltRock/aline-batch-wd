@@ -3,11 +3,15 @@ package com.alinebatch.alinebatchwd.analytics.InTransit;
 import com.alinebatch.alinebatchwd.analytics.AnalysisWrite;
 import com.alinebatch.alinebatchwd.analytics.InTransitAnalysis;
 import com.alinebatch.alinebatchwd.models.TransactionDTO;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class ProcessSpecificTransaction extends AnalysisWrite<String, ArrayList<TransactionDTO>> implements InTransitAnalysis<TransactionDTO> {
+
+    Integer count = 0;
 
     @Override
     public Class getKeyClass() {

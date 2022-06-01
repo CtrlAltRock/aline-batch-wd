@@ -30,4 +30,6 @@ public class Merchant {
 
     private Boolean hadErrors = false;
 
+    private Boolean hadOnline = false;
+
 }

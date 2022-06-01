@@ -89,11 +89,23 @@ public class TopFiveMerchantsNoErrorsNoIb extends SortedWriter<String, Integer> 
             Merchant merchant = MerchantCache.getInstance().get(k);
             if (!merchant.getHadErrors() && merchant.getHadIb())
             {
-                log.info("Placing");
                 unsorted.put(k,v);
             }
         });
 
         return QueryList.getTopX(unsorted,5);
+    }
+
+    @Override
+    public Integer defaultValue() {
+        return 0;
+    }
+
+    @Override
+    public void increment(String key) {
+        synchronized (unsortedTally)
+        {
+            put(key, get(key) + 1);
+        }
     }
 }

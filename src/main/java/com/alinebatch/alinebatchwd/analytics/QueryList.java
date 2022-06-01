@@ -77,13 +77,54 @@ public class QueryList {
         return topX;
     }
 
+    public static ArrayList<String> getBottomX(HashMap<String, Integer> collection, Integer count)
+    {
+        ArrayList<String> topX = new ArrayList<>();
+        collection.forEach((key, value) ->
+        {
+
+            int i = 0;
+            int storedVal = value;
+            String storedString = key + " " + value;
+            while (i < count)
+            {
+                if (topX.size() == count)
+                {
+                    if (storedVal > decode(topX.get(count - 1)))
+                    {
+                        break;
+                    }
+                }
+                while (i < count)
+                {
+                    if (i == topX.size())
+                    {
+
+                        topX.add(storedString);
+                        break;
+                    }
+                    int queriedValue = decode(topX.get(i));
+                    if (queriedValue> storedVal)
+                    {
+                        String newString = topX.get(i);
+                        topX.set(i, storedString);
+                        storedString = newString;
+                        storedVal = queriedValue;
+                    }
+                    i++;
+                }
+            }
+        });
+
+        return topX;
+    }
+
     public static Integer decode(String entry)
     {
         try {
             return Integer.parseInt(entry.split(" ")[1]);
         } catch (Exception e)
         {
-            log.info("Empty or malformed value, returning default 0");
             return 0;
         }
     }
