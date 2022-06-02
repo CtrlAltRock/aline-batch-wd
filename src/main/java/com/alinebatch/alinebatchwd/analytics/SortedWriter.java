@@ -23,6 +23,42 @@ public abstract class SortedWriter<T,U> extends AnalysisWrite<T,U>{
 
     public abstract ArrayList<String> sort(HashMap<T,U> toSort);
 
+    public abstract U defaultValue();
+
+    public void put(T key, U value)
+    {
+        if (unsortedTally.get(key) == null)
+        {
+            synchronized (unsortedTally)
+            {
+                if (unsortedTally.get(key) == null)
+                {
+                    create(key);
+                }
+            }
+        }
+        unsortedTally.put(key, value);
+    }
+
+    public U get(T key) throws NullPointerException
+    {
+        if (unsortedTally.get(key) == null)
+        {
+            create(key);
+            return defaultValue();
+        } else {
+            return unsortedTally.get(key);
+        }
+
+    }
+
+    public abstract void increment(T key);
+
+    public void create(T key)
+    {
+        unsortedTally.put(key, defaultValue());
+    }
+
     @Override
     public void write() throws Exception
     {
@@ -50,5 +86,6 @@ public abstract class SortedWriter<T,U> extends AnalysisWrite<T,U>{
         });
         fw.write("</" + rootTag() + ">");
         fw.close();
+        unsortedTally = new HashMap<>();
     }
 }

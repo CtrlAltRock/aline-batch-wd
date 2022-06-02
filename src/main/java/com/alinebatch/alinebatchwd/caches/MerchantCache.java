@@ -5,6 +5,7 @@ import com.alinebatch.alinebatchwd.models.Merchant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.jni.Time;
 
+import javax.validation.constraints.Null;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.AbstractMap;
@@ -42,12 +43,38 @@ public class MerchantCache {
 
    public static void toggleIb(String name)
    {
-       getInstance().merchantMap.get(name).setHadIb(true);
+       try {
+           getInstance().merchantMap.get(name).setHadIb(true);
+       } catch (NullPointerException e)
+       {
+           //thread was behind and the toggle was not able to complete.
+           log.info("Caught Null Pointer, retrying in toggleIb()");
+           toggleIb(name);
+       }
    }
 
     public static void toggleErrors(String name)
     {
-        getInstance().merchantMap.get(name).setHadErrors(true);
+        try {
+
+            getInstance().merchantMap.get(name).setHadErrors(true);
+        } catch (NullPointerException e)
+        {
+            log.info("Caught Null Pointer, retrying in SetErrors()");
+            toggleErrors(name);
+        }
+    }
+
+    public static void toggleOnline(String name)
+    {
+        try
+        {
+            getInstance().merchantMap.get(name).setHadOnline(true);
+        } catch (NullPointerException e)
+        {
+            log.info("Caught Null Pointer, retrying in toggleOnline()");
+            toggleOnline(name);
+        }
     }
 
    public static Merchant set(String name, Merchant merchant, Long id)

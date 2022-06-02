@@ -1,6 +1,5 @@
 package com.alinebatch.alinebatchwd.generators;
 
-import com.alinebatch.alinebatchwd.analytics.Analyzer;
 import com.alinebatch.alinebatchwd.caches.CardCache;
 import com.alinebatch.alinebatchwd.caches.MerchantCache;
 import com.alinebatch.alinebatchwd.caches.UserCache;
@@ -60,19 +59,6 @@ public class GeneratorBean {
                 }
             }
         }
-        /*
-        if (userCache.get(id) == null) {
-            synchronized (userCache) {
-                if (userCache.get(id) == null) {
-
-                        UserDTO user = userGenerator.generateUser(id);
-                        userCache.set(id, user);
-                        log.info(id + "");
-                        return user;
-                }
-            }
-        }
-        */
         userCache.checkLatest(id);
         return userCache.get(id);
     }

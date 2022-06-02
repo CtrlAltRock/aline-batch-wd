@@ -65,29 +65,8 @@ public class MostTransactionsByZipCode extends SortedWriter<String, Integer> imp
         if (!input.getMerchant_zip().equals(""))
         {
             String zip = input.getMerchant_zip();
-            if (unsortedTally.get(zip) == null)
-            {
-                synchronized (unsortedTally)
-                {
-                    log.info("Creating new zip");
-                    if (unsortedTally.get(zip) == null)
-                    {
-                        unsortedTally.put(zip,0);
-                    }
-                }
-            }
-            synchronized (unsortedTally)
-            {
-                try
-                {
-                    unsortedTally.put(zip, unsortedTally.get(zip) + 1);
-                } catch (NullPointerException e)
-                {
-                    log.info(zip);
-                    log.info(e.getMessage());
-                }
+            increment(zip);
 
-            }
 
         }
     }
@@ -95,5 +74,19 @@ public class MostTransactionsByZipCode extends SortedWriter<String, Integer> imp
     @Override
     public ArrayList<String> sort(HashMap<String, Integer> toSort) {
         return QueryList.getTopX(unsortedTally,5);
+    }
+
+    @Override
+    public Integer defaultValue() {
+        return 0;
+    }
+
+    @Override
+    public void increment(String key) {
+        synchronized (unsortedTally)
+        {
+            put(key, get(key) + 1);
+        }
+
     }
 }

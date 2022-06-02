@@ -4,12 +4,16 @@ import com.alinebatch.alinebatchwd.analytics.InTransitAnalysis;
 import com.alinebatch.alinebatchwd.analytics.QueryList;
 import com.alinebatch.alinebatchwd.analytics.SortedWriter;
 import com.alinebatch.alinebatchwd.models.TransactionDTO;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class TopCityByTransaction extends SortedWriter<String, Integer> implements InTransitAnalysis<TransactionDTO> {
-    public TopCityByTransaction(int count) {
+
+@Slf4j
+public class BottomFiveMonths extends SortedWriter<String, Integer> implements InTransitAnalysis<TransactionDTO> {
+
+    public BottomFiveMonths(int count) {
         super(count);
     }
 
@@ -25,7 +29,7 @@ public class TopCityByTransaction extends SortedWriter<String, Integer> implemen
 
     @Override
     public String keyName() {
-        return "City";
+        return "Month";
     }
 
     @Override
@@ -35,23 +39,30 @@ public class TopCityByTransaction extends SortedWriter<String, Integer> implemen
 
     @Override
     public String rootTag() {
-        return "Top_Transactions_Grouped_By_Cities";
+        return "Bottom_5_Months_With_Number_Of_Online_Transactions";
     }
 
     @Override
     public String filePath() {
-        return "/Users/willemduiker/IdeaProjects/aline-batch-wd/src/main/resources/analysis/TopCityByTransaction.xml";
+        return "/Users/willemduiker/IdeaProjects/aline-batch-wd/src/main/resources/analysis/Bottom_5_Months_With_Number_Of_Online_Transactions.xml";
     }
 
     @Override
     public void process(TransactionDTO input) {
-        String city = input.getMerchant_city().replace(" ","_");
-        increment(city);
+
+        if (input.getMethod().contains("Online"))
+        {
+            String key = input.getMonth() + "";
+            increment(key);
+
+
+        }
+
     }
 
     @Override
     public ArrayList<String> sort(HashMap<String, Integer> toSort) {
-        return QueryList.getTopX(unsortedTally,5);
+        return QueryList.getBottomX(unsortedTally,5);
     }
 
     @Override
@@ -63,8 +74,7 @@ public class TopCityByTransaction extends SortedWriter<String, Integer> implemen
     public void increment(String key) {
         synchronized (unsortedTally)
         {
-            int i = get(key);
-            put(key, i + 1);
+            put(key, get(key) + 1);
         }
     }
 }

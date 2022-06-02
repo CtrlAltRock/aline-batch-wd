@@ -33,16 +33,7 @@ public abstract class AnalysisWrite<T,U> {
 
     protected void write() throws Exception
     {
-        log.info("Writing for " + rootTag());
-        File output = new File(filePath());
-        FileWriter fw = new FileWriter(output);
-        fw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        fw.close();
-        XStream xs = new XStream();
-        FileOutputStream fos = new FileOutputStream(output, true);
-        xs.alias(keyName(), getKeyClass());
-        xs.alias(valueName(), getValueClass());
-        xs.alias(rootTag(), Map.class);
-        xs.toXML(analysisMap, fos);
+        XMLWriter.write(this);
+        analysisMap = new ConcurrentHashMap<>();
     }
 }
